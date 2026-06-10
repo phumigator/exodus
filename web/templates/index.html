@@ -2,13 +2,44 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Exodus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Exodus</h1>
-    <ul>
-        <li><a href="/zcyc/">ZCYC Dashboard</a></li>
-        <li><a href="/about">О разработчике</a></li>
-    </ul>
+    <header>
+        <h1>Exodus</h1>
+        <p>Платформа аналитических и AI-сервисов</p>
+    </header>
+    <main>
+        <div class="cards">
+            <a class="card" href="/zcyc/">
+                <span class="badge">Доступно</span>
+                <h2>📊 ZCYC Dashboard</h2>
+                <p>Кривая бескупонной доходности и анализ облигаций по ИНН.</p>
+            </a>
+
+            <a class="card" href="/api/docs">
+                <span class="badge soon">В разработке</span>
+                <h2>🎙️ Транскрибация и суммаризация</h2>
+                <p>Загрузка аудио/видео, распознавание речи (Whisper) и суммаризация (Ollama).</p>
+            </a>
+
+            <a class="card" href="/api/docs">
+                <span class="badge soon">В разработке</span>
+                <h2>📈 Аналитика</h2>
+                <p>Выгрузка и просмотр аналитики из базы данных Postgres.</p>
+            </a>
+
+            <a class="card" href="/about">
+                <span class="badge">Доступно</span>
+                <h2>👤 О разработчике</h2>
+                <p>Опыт, навыки и контакты автора этих сервисов.</p>
+            </a>
+        </div>
+    </main>
+    <footer>
+        Exodus &mdash; <a href="/about">о разработчике</a>
+    </footer>
 </body>
 </html>
