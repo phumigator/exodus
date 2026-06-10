@@ -1,0 +1,331 @@
+"""
+Колбэки для загрузки данных ZCYC, расчёта кривой и настройки графика.
+"""
+import pandas as pd
+import plotly.graph_objects as go
+from dash import dcc, html, Input, Output, State, callback, no_update, callback_context
+import dash_bootstrap_components as dbc
+
+from .exchange import fetch_zcyc_data, calculate_zcyc_curve, default_zcyc_data
+
+CURVE_POINTS = 1500
+
+
+def register_callbacks(app):
+    """Регистрирует колбэки, связанные с кривой и графиком."""
+
+    @app.callback(
+        [Output('zcyc-data-store', 'data'),
+         Output('params-table', 'data'),
+         Output('date-display', 'children'),
+         Output('time-display', 'children')],
+        [Input('refresh-btn', 'n_clicks'),
+         Input('interval-component', 'n_intervals')]
+    )
+    def update_data(n_clicks, n_intervals):
+        ctx = callback_context
+        if not ctx.triggered:
+            # Используем default_zcyc_data, если нет триггера
+            date_display = f"Дата: {default_zcyc_data['tradedate'].iloc[0]}"
+            time_display = f"Время: {default_zcyc_data['tradetime'].iloc[0]}"
+            params_data = [
+                {"parameter": "B1 (beta0)", "value": f"{float(default_zcyc_data['B1'].iloc[0]):.6f}",
+                 "description": "Уровень кривой"},
+                {"parameter": "B2 (beta1)", "value": f"{float(default_zcyc_data['B2'].iloc[0]):.6f}",
+                 "description": "Наклон кривой"},
+                {"parameter": "B3 (beta2)", "value": f"{float(default_zcyc_data['B3'].iloc[0]):.6f}",
+                 "description": "Кривизна"},
+                {"parameter": "T1 (tau)", "value": f"{float(default_zcyc_data['T1'].iloc[0]):.6f}",
+                 "description": "Масштабирующий параметр"},
+                {"parameter": "Дата", "value": default_zcyc_data['tradedate'].iloc[0],
+                 "description": "Дата расчета"}
+            ]
+            return default_zcyc_data.to_dict('records'), params_data, date_display, time_display
+
+        df_data_new, error = fetch_zcyc_data()
+        if df_data_new is None:
+            # Если ошибка, возвращаем no_update для всех выходов
+            return no_update, no_update, no_update, no_update
+
+        date_display = f"Дата: {df_data_new['tradedate'].iloc[0]}"
+        time_display = f"Время: {df_data_new['tradetime'].iloc[0]}"
+
+        params_data = [
+            {"parameter": "B1 (beta0)", "value": f"{float(df_data_new['B1'].iloc[0]):.6f}",
+             "description": "Уровень кривой"},
+            {"parameter": "B2 (beta1)", "value": f"{float(df_data_new['B2'].iloc[0]):.6f}",
+             "description": "Наклон кривой"},
+            {"parameter": "B3 (beta2)", "value": f"{float(df_data_new['B3'].iloc[0]):.6f}",
+             "description": "Кривизна"},
+            {"parameter": "T1 (tau)", "value": f"{float(df_data_new['T1'].iloc[0]):.6f}",
+             "description": "Масштабирующий параметр"},
+            {"parameter": "Дата", "value": df_data_new['tradedate'].iloc[0],
+             "description": "Дата расчета"}
+        ]
+
+        return df_data_new.to_dict('records'), params_data, date_display, time_display
+
+    @app.callback(
+        Output('calculated-curve-store', 'data'),
+        [Input('zcyc-data-store', 'data'),
+         Input('x-range-slider', 'value')]
+    )
+    def calculate_curve(data, x_range):
+        if not data:
+            return {}
+        try:
+            df_data = pd.DataFrame(data)
+            if df_data.empty:
+                return {}
+            params = df_data.iloc[0].to_dict()
+            t_min, t_max = x_range
+            results_df, error = calculate_zcyc_curve(params, t_min, t_max, CURVE_POINTS)
+            if error:
+                return {}
+            return results_df.to_dict('records')
+        except Exception as e:
+            print(f"Exception in calculate_curve: {e}")
+            return {}
+
+    @app.callback(
+        Output('zcyc-plot', 'figure'),
+        [Input('calculated-curve-store', 'data'),
+         Input('y-range-slider', 'value'),
+         Input('line-color', 'value'),
+         Input('line-width', 'value'),
+         Input('line-style', 'value'),
+         Input('zcyc-data-store', 'data'),
+         Input('custom-points-store', 'data'),
+         Input('show-point-labels', 'value'),
+         Input('show-legend', 'value'),
+         Input('show-title', 'value'),
+         Input('show-grid', 'value'),
+         Input('label-mode', 'value'),
+         Input('x-range-slider', 'value'),
+         Input('label-angle', 'value')]          # <-- добавлен угол поворота
+    )
+    def update_plots(curve_data, y_range, line_color, line_width, line_style,
+                     raw_data, custom_points, show_labels, show_legend, show_title,
+                     show_grid, label_mode, x_range, label_angle):   # <-- параметр угла
+
+        # Преобразование чекбоксов
+        show_labels = bool(show_labels and show_labels[0]) if isinstance(show_labels, list) else bool(show_labels)
+        show_legend = bool(show_legend and show_legend[0]) if isinstance(show_legend, list) else bool(show_legend)
+        show_title = bool(show_title and show_title[0]) if isinstance(show_title, list) else bool(show_title)
+        show_grid = bool(show_grid and show_grid[0]) if isinstance(show_grid, list) else bool(show_grid)
+
+        if not curve_data:
+            empty_fig = go.Figure()
+            empty_fig.update_layout(
+                title="Нет данных кривой" if show_title else "",
+                xaxis_title="Срок до погашения, лет",
+                yaxis_title="Доходность, % годовых",
+                plot_bgcolor='white',
+                height=500
+            )
+            return empty_fig
+
+        try:
+            results_df = pd.DataFrame(curve_data)
+            if results_df.empty:
+                empty_fig = go.Figure()
+                empty_fig.update_layout(title="Данные кривой пусты" if show_title else "", height=500)
+                return empty_fig
+
+            fig_main = go.Figure()
+            fig_main.add_trace(go.Scatter(
+                x=results_df['Срок (лет)'],
+                y=results_df['Доходность (%)'],
+                mode='lines',
+                name='Кривая ZCYC',
+                line=dict(color=line_color, width=line_width, dash=line_style),
+                hovertemplate='Срок: %{x:.2f} лет<br>Доходность: %{y:.4f}%<extra></extra>'
+            ))
+
+            if custom_points:
+                groups = {}
+                for point in custom_points:
+                    key = point.get('issuer') if point.get('issuer') else point['name']
+                    if key not in groups:
+                        groups[key] = []
+                    groups[key].append(point)
+
+                for group_name, points in groups.items():
+                    color = points[0]['color']
+                    x_vals = [p['term'] for p in points]
+                    y_vals = [p['yield'] for p in points]
+                    names = [p['name'] for p in points]
+                    sizes = [p.get('size', 10) for p in points]
+
+                    # Добавляем маркеры (всегда)
+                    fig_main.add_trace(go.Scatter(
+                        x=x_vals,
+                        y=y_vals,
+                        mode='markers',
+                        name=group_name,
+                        marker=dict(size=sizes, color=color, symbol='circle', line=dict(width=1, color='white')),
+                        hovertemplate=(
+                            "<b>%{text}</b><br>"
+                            "Срок: %{x:.2f} лет<br>"
+                            "Доходность: %{y:.2f}%<br>"
+                            "<extra></extra>"
+                        ),
+                        text=names  # для ховера
+                    ))
+
+                    # Добавляем подписи в зависимости от режима
+                    if show_labels:
+                        if label_mode == 'inline':
+                            # Текст рядом с точками с поворотом
+                            fig_main.add_trace(go.Scatter(
+                                x=x_vals,
+                                y=y_vals,
+                                mode='text',
+                                text=names,
+                                textposition="top center",
+                                textfont=dict(size=10),
+                                textangle=label_angle,   # <-- угол поворота
+                                showlegend=False,
+                                hoverinfo='none'
+                            ))
+                        else:  # callout
+                            # Вычисляем смещение на основе диапазонов осей
+                            if x_range is not None and len(x_range) == 2:
+                                x_min, x_max = x_range
+                                x_offset = (x_max - x_min) * 0.02  # 2% от ширины диапазона
+                            else:
+                                x_offset = 0.2
+                            if y_range is not None and len(y_range) == 2:
+                                y_min, y_max = y_range
+                                y_offset = (y_max - y_min) * 0.02
+                            else:
+                                y_offset = 0.1
+
+                            for i, point in enumerate(points):
+                                fig_main.add_annotation(
+                                    x=point['term'],
+                                    y=point['yield'],
+                                    ax=point['term'] + x_offset,
+                                    ay=point['yield'] + y_offset,
+                                    xref='x',
+                                    yref='y',
+                                    axref='x',
+                                    ayref='y',
+                                    text=point['name'],
+                                    showarrow=True,
+                                    arrowhead=2,
+                                    arrowsize=1,
+                                    arrowwidth=1,
+                                    arrowcolor='gray',
+                                    font=dict(size=10),
+                                    textangle=label_angle,   # <-- угол поворота
+                                    align='center',
+                                    bordercolor='lightgray',
+                                    borderwidth=1,
+                                    borderpad=2,
+                                    bgcolor='rgba(255,255,255,0.8)'
+                                )
+
+            title_text = ''
+            if show_title:
+                title_text = 'Кривая бескупонной доходности (ZCYC)'
+                if raw_data:
+                    try:
+                        df_raw = pd.DataFrame(raw_data)
+                        if not df_raw.empty:
+                            date_str = df_raw['tradedate'].iloc[0]
+                            time_str = df_raw['tradetime'].iloc[0]
+                            title_text += f' - {date_str} {time_str}'
+                    except:
+                        pass
+                if custom_points:
+                    title_text += f' | Точек: {len(custom_points)}'
+
+            # Формируем настройки осей с учётом сетки
+            xaxis_layout = dict(
+                title='Срок до погашения, лет',
+                showgrid=show_grid,
+                gridwidth=1,
+                gridcolor='lightgray',
+                griddash='solid'
+            )
+            yaxis_layout = dict(
+                title='Доходность, % годовых',
+                range=y_range,
+                showgrid=show_grid,
+                gridwidth=1,
+                gridcolor='lightgray',
+                griddash='solid'
+            )
+
+            fig_main.update_layout(
+                title=title_text,
+                xaxis=xaxis_layout,
+                yaxis=yaxis_layout,
+                hovermode='closest',
+                showlegend=show_legend,
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                plot_bgcolor='white',
+                height=500
+            )
+
+            return fig_main
+
+        except Exception as e:
+            print(f"Exception in update_plots: {e}")
+            import traceback
+            traceback.print_exc()
+            empty_fig = go.Figure()
+            empty_fig.update_layout(title=f"Ошибка: {str(e)}" if show_title else "")
+            return empty_fig
+
+    @app.callback(
+        Output('y-range-slider', 'value'),
+        [Input('auto-y-btn', 'n_clicks'),
+         Input('calculated-curve-store', 'data'),
+         Input('custom-points-store', 'data')],
+        [State('y-range-slider', 'value')]
+    )
+    def auto_adjust_y_range(n_clicks, curve_data, custom_points, current_range):
+        ctx = callback_context
+        if not ctx.triggered:
+            return current_range
+        min_val = float('inf')
+        max_val = float('-inf')
+        if curve_data:
+            try:
+                df = pd.DataFrame(curve_data)
+                if not df.empty and 'Доходность (%)' in df.columns:
+                    min_val = min(min_val, df['Доходность (%)'].min())
+                    max_val = max(max_val, df['Доходность (%)'].max())
+            except:
+                pass
+        if custom_points:
+            try:
+                for p in custom_points:
+                    y = p.get('yield')
+                    if y is not None:
+                        min_val = min(min_val, y)
+                        max_val = max(max_val, y)
+            except:
+                pass
+        if min_val == float('inf') or max_val == float('-inf'):
+            return current_range
+        padding = (max_val - min_val) * 0.1
+        new_min = max(min_val - padding, -10)
+        new_max = min(max_val + padding, 20)
+        return [new_min, new_max]
+
+    @app.callback(
+        Output("download-data", "data"),
+        [Input("download-data-btn", "n_clicks")],
+        [State("calculated-curve-store", "data")]
+    )
+    def download_data(n_clicks, data):
+        if n_clicks and data:
+            try:
+                df = pd.DataFrame(data)
+                return dcc.send_data_frame(df.to_csv, "zcyc_data.csv", index=False)
+            except Exception as e:
+                print(f"Error downloading data: {e}")
+        return None
