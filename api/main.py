@@ -4,8 +4,8 @@ FastAPI-сервис Exodus: транскрибация/суммаризация
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import settings
-from .routers import transcription, analytics
+from config import settings
+from routers import transcription, analytics
 
 app = FastAPI(title="Exodus API")
 

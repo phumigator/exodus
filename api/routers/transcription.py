@@ -7,7 +7,7 @@
 import httpx
 from fastapi import APIRouter, UploadFile, File, HTTPException
 
-from ..config import settings
+from config import settings
 
 router = APIRouter(prefix="/transcription", tags=["transcription"])
 

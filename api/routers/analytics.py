@@ -4,7 +4,7 @@
 import asyncpg
 from fastapi import APIRouter, HTTPException
 
-from ..config import settings
+from config import settings
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
