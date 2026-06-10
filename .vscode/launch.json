@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Exodus: Web (Flask + Dash)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/web/app.py",
+            "python": "${workspaceFolder}/web/.venv/bin/python",
+            "cwd": "${workspaceFolder}/web",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Exodus: API (FastAPI)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": ["main:app", "--reload", "--port", "8000"],
+            "python": "${workspaceFolder}/api/.venv/bin/python",
+            "cwd": "${workspaceFolder}/api",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Exodus: Web + API",
+            "configurations": ["Exodus: Web (Flask + Dash)", "Exodus: API (FastAPI)"]
+        }
+    ]
+}
