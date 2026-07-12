@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Транскрибация и суммаризация — Exodus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>🎙️ Транскрибация и суммаризация</h1>
+        <p>Загрузите аудио или видео — получите текст и краткую выжимку</p>
+        <nav><a href="/">&larr; на главную</a></nav>
+    </header>
+    <main>
+        <form id="upload-form" class="transcription-form">
+            <input type="file" id="file-input" name="file" accept="audio/*,video/*" required>
+            <button type="submit" id="transcribe-btn">Распознать речь</button>
+        </form>
+
+        <p id="status" class="status" hidden></p>
+
+        <section id="transcript-section" hidden>
+            <h2>Расшифровка</h2>
+            <textarea id="transcript" rows="10"></textarea>
+            <button type="button" id="summarize-btn">Суммаризировать</button>
+        </section>
+
+        <section id="summary-section" hidden>
+            <h2>Краткая выжимка</h2>
+            <div id="summary" class="summary-box"></div>
+        </section>
+
+        <section id="chat-section">
+            <h2>Чат с моделью OpenRouter</h2>
+            <div class="chat-model-row">
+                <label for="chat-model">Модель:</label>
+                <input type="text" id="chat-model" placeholder="openai/gpt-4o-mini (по умолчанию)">
+                <button type="button" id="chat-clear-btn">Очистить чат</button>
+            </div>
+            <div id="chat-history" class="chat-history"></div>
+            <form id="chat-form" class="chat-form">
+                <textarea id="chat-input" rows="2" placeholder="Введите сообщение..." required></textarea>
+                <button type="submit" id="chat-send-btn">Отправить</button>
+            </form>
+            <p id="chat-status" class="status" hidden></p>
+        </section>
+    </main>
+    <footer>
+        Exodus &mdash; <a href="/about">о разработчике</a>
+    </footer>
+
+    <script>
+        const API_BASE_URL = {{ api_base_url | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='transcription.js') }}"></script>
+</body>
+</html>

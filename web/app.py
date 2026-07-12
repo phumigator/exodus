@@ -1,9 +1,15 @@
 """
 Главное Flask-приложение Exodus: монтирует Dash-дашборд и отдаёт статические разделы.
 """
+import os
+
 from flask import Flask, render_template
 
 from dash_app import create_dash_app
+
+# В проде nginx проксирует FastAPI под /api/ (см. nginx/exodus.conf);
+# локально сервисы запущены раздельно, поэтому обращаемся к API напрямую.
+API_BASE_URL = os.environ.get("EXODUS_API_BASE_URL", "http://localhost:8000")
 
 
 def create_app():
@@ -18,6 +24,10 @@ def create_app():
     @server.route("/about")
     def about():
         return render_template("about.html")
+
+    @server.route("/transcription")
+    def transcription():
+        return render_template("transcription.html", api_base_url=API_BASE_URL)
 
     return server
 

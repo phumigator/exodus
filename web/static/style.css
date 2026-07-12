@@ -128,3 +128,123 @@ footer {
     color: #868e96;
     font-size: .9rem;
 }
+
+.transcription-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+}
+
+button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: .6rem 1.2rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: .9;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.status {
+    margin: 1rem 0;
+    color: #495057;
+}
+
+.status-error {
+    color: #c0392b;
+}
+
+#transcript-section, #summary-section {
+    margin-top: 1.5rem;
+}
+
+textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 1rem;
+    padding: .75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    resize: vertical;
+}
+
+.summary-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+    white-space: pre-wrap;
+}
+
+.chat-model-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.chat-model-row input[type="text"] {
+    flex: 1;
+    padding: .5rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.chat-history {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+    padding: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    margin-bottom: 1rem;
+}
+
+.chat-message {
+    padding: .6rem .9rem;
+    border-radius: 8px;
+    max-width: 80%;
+    white-space: pre-wrap;
+}
+
+.chat-message-user {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #fff;
+}
+
+.chat-message-assistant {
+    align-self: flex-start;
+    background: #e9ecef;
+    color: #212529;
+}
+
+.chat-form {
+    display: flex;
+    gap: .75rem;
+    align-items: flex-end;
+}
+
+.chat-form textarea {
+    flex: 1;
+    margin-bottom: 0;
+}

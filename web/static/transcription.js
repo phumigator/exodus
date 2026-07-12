@@ -1,0 +1,153 @@
+const form = document.getElementById("upload-form");
+const transcribeBtn = document.getElementById("transcribe-btn");
+const summarizeBtn = document.getElementById("summarize-btn");
+const statusEl = document.getElementById("status");
+const transcriptSection = document.getElementById("transcript-section");
+const transcriptEl = document.getElementById("transcript");
+const summarySection = document.getElementById("summary-section");
+const summaryEl = document.getElementById("summary");
+
+function showStatus(message, isError = false) {
+    statusEl.textContent = message;
+    statusEl.hidden = !message;
+    statusEl.classList.toggle("status-error", isError);
+}
+
+async function parseError(response) {
+    try {
+        const data = await response.json();
+        return data.detail || response.statusText;
+    } catch {
+        return response.statusText;
+    }
+}
+
+form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const fileInput = document.getElementById("file-input");
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    transcribeBtn.disabled = true;
+    summarySection.hidden = true;
+    transcriptSection.hidden = true;
+    showStatus("Распознаём речь, это может занять несколько минут...");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/transcription/transcribe`, {
+            method: "POST",
+            body: formData,
+        });
+        if (!response.ok) {
+            throw new Error(await parseError(response));
+        }
+        const data = await response.json();
+        transcriptEl.value = data.text || JSON.stringify(data);
+        transcriptSection.hidden = false;
+        showStatus("Готово.");
+    } catch (err) {
+        showStatus(`Ошибка распознавания: ${err.message}`, true);
+    } finally {
+        transcribeBtn.disabled = false;
+    }
+});
+
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+const chatModelInput = document.getElementById("chat-model");
+const chatHistoryEl = document.getElementById("chat-history");
+const chatSendBtn = document.getElementById("chat-send-btn");
+const chatClearBtn = document.getElementById("chat-clear-btn");
+const chatStatusEl = document.getElementById("chat-status");
+
+let chatHistory = [];
+
+function showChatStatus(message, isError = false) {
+    chatStatusEl.textContent = message;
+    chatStatusEl.hidden = !message;
+    chatStatusEl.classList.toggle("status-error", isError);
+}
+
+function renderChatHistory() {
+    chatHistoryEl.innerHTML = "";
+    for (const message of chatHistory) {
+        const bubble = document.createElement("div");
+        bubble.className = `chat-message chat-message-${message.role}`;
+        bubble.textContent = message.content;
+        chatHistoryEl.appendChild(bubble);
+    }
+    chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+}
+
+chatForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const text = chatInput.value.trim();
+    if (!text) return;
+
+    chatHistory.push({ role: "user", content: text });
+    renderChatHistory();
+    chatInput.value = "";
+
+    chatSendBtn.disabled = true;
+    showChatStatus("Модель отвечает...");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/transcription/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                messages: chatHistory,
+                model: chatModelInput.value.trim() || null,
+            }),
+        });
+        if (!response.ok) {
+            throw new Error(await parseError(response));
+        }
+        const data = await response.json();
+        chatHistory.push({ role: "assistant", content: data.content });
+        renderChatHistory();
+        showChatStatus("");
+    } catch (err) {
+        showChatStatus(`Ошибка чата: ${err.message}`, true);
+    } finally {
+        chatSendBtn.disabled = false;
+    }
+});
+
+chatClearBtn.addEventListener("click", () => {
+    chatHistory = [];
+    renderChatHistory();
+    showChatStatus("");
+});
+
+summarizeBtn.addEventListener("click", async () => {
+    const text = transcriptEl.value.trim();
+    if (!text) return;
+
+    summarizeBtn.disabled = true;
+    showStatus("Суммаризируем текст...");
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/transcription/summarize`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+        });
+        if (!response.ok) {
+            throw new Error(await parseError(response));
+        }
+        const data = await response.json();
+        summaryEl.textContent = data.summary;
+        summarySection.hidden = false;
+        showStatus("Готово.");
+    } catch (err) {
+        showStatus(`Ошибка суммаризации: ${err.message}`, true);
+    } finally {
+        summarizeBtn.disabled = false;
+    }
+});

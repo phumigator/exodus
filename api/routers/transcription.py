@@ -1,15 +1,64 @@
 """
 Транскрибация и суммаризация загруженного аудио/видео.
 
-Аудио передаётся в Whisper (распознавание речи), полученный текст —
-в Ollama (суммаризация), оба сервиса работают на удалённом сервере.
+Аудио передаётся в Whisper (распознавание речи, удалённый сервер),
+полученный текст — в OpenRouter (суммаризация через внешний LLM API).
 """
 import httpx
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from pydantic import BaseModel
 
 from config import settings
 
 router = APIRouter(prefix="/transcription", tags=["transcription"])
+
+
+class SummarizeRequest(BaseModel):
+    text: str
+    model: str | None = None
+
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage]
+    model: str | None = None
+
+
+async def _call_openrouter(messages: list[dict], model: str | None) -> str:
+    """Отправляет список сообщений в OpenRouter (chat completions) и возвращает ответ модели."""
+    if not settings.openrouter_api_key:
+        raise HTTPException(status_code=500, detail="EXODUS_OPENROUTER_API_KEY не задан")
+
+    payload = {
+        "model": model or settings.openrouter_model,
+        "messages": messages,
+    }
+    headers = {
+        "Authorization": f"Bearer {settings.openrouter_api_key}",
+        "HTTP-Referer": settings.openrouter_site_url,
+        "X-Title": settings.openrouter_app_name,
+    }
+
+    async with httpx.AsyncClient(timeout=120) as client:
+        try:
+            response = await client.post(
+                f"{settings.openrouter_base_url}/chat/completions",
+                json=payload,
+                headers=headers,
+            )
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise HTTPException(status_code=502, detail=f"OpenRouter API error: {exc}")
+
+    data = response.json()
+    try:
+        return data["choices"][0]["message"]["content"]
+    except (KeyError, IndexError):
+        raise HTTPException(status_code=502, detail=f"Неожиданный ответ OpenRouter: {data}")
 
 
 @router.post("/transcribe")
@@ -30,21 +79,25 @@ async def transcribe(file: UploadFile = File(...)):
 
 
 @router.post("/summarize")
-async def summarize(text: str, model: str = "llama3"):
-    """Отправляет текст в Ollama и возвращает суммаризацию."""
-    payload = {
-        "model": model,
-        "prompt": f"Сделай краткую выжимку следующего текста:\n\n{text}",
-        "stream": False,
-    }
-    async with httpx.AsyncClient(timeout=600) as client:
-        try:
-            response = await client.post(
-                f"{settings.remote_api_base_url}/api/generate",
-                json=payload,
-            )
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
-            raise HTTPException(status_code=502, detail=f"Ollama API error: {exc}")
+async def summarize(request: SummarizeRequest):
+    """Суммаризирует текст через OpenRouter."""
+    messages = [
+        {
+            "role": "system",
+            "content": "Ты помощник, который делает краткую выжимку текста на русском языке.",
+        },
+        {
+            "role": "user",
+            "content": f"Сделай краткую выжимку следующего текста:\n\n{request.text}",
+        },
+    ]
+    summary = await _call_openrouter(messages, request.model)
+    return {"summary": summary}
 
-    return response.json()
+
+@router.post("/chat")
+async def chat(request: ChatRequest):
+    """Пересылает историю диалога в OpenRouter и возвращает ответ модели."""
+    messages = [m.model_dump() for m in request.messages]
+    reply = await _call_openrouter(messages, request.model)
+    return {"role": "assistant", "content": reply}
