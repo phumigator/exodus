@@ -101,13 +101,11 @@ def register_callbacks(app):
          Input('show-title', 'value'),
          Input('show-grid', 'value'),
          Input('label-mode', 'value'),
-         Input('x-range-slider', 'value'),
-         Input('label-angle', 'value')]          # <-- добавлен угол поворота
+         Input('x-range-slider', 'value')]
     )
     def update_plots(curve_data, y_range, line_color, line_width, line_style,
                      raw_data, custom_points, show_labels, show_legend, show_title,
-                     show_grid, label_mode, x_range, label_angle):   # <-- параметр угла
-
+                     show_grid, label_mode, x_range):
         # Преобразование чекбоксов
         show_labels = bool(show_labels and show_labels[0]) if isinstance(show_labels, list) else bool(show_labels)
         show_legend = bool(show_legend and show_legend[0]) if isinstance(show_legend, list) else bool(show_legend)
@@ -176,7 +174,7 @@ def register_callbacks(app):
                     # Добавляем подписи в зависимости от режима
                     if show_labels:
                         if label_mode == 'inline':
-                            # Текст рядом с точками с поворотом
+                            # Текст рядом с точками
                             fig_main.add_trace(go.Scatter(
                                 x=x_vals,
                                 y=y_vals,
@@ -184,7 +182,6 @@ def register_callbacks(app):
                                 text=names,
                                 textposition="top center",
                                 textfont=dict(size=10),
-                                textangle=label_angle,   # <-- угол поворота
                                 showlegend=False,
                                 hoverinfo='none'
                             ))
@@ -218,7 +215,6 @@ def register_callbacks(app):
                                     arrowwidth=1,
                                     arrowcolor='gray',
                                     font=dict(size=10),
-                                    textangle=label_angle,   # <-- угол поворота
                                     align='center',
                                     bordercolor='lightgray',
                                     borderwidth=1,

@@ -23,7 +23,7 @@ def create_layout():
         # Заголовок
         dbc.Row([
             dbc.Col([
-                html.H1("📊 ZCYC Dashboard + Облигации по ИНН",
+                html.H1("📊 КБД + Облигации по ИНН",
                         className="text-center mb-4",
                         style={'color': '#2c3e50'})
             ], width=12)
@@ -160,15 +160,6 @@ def create_layout():
                                 ],
                                 value='inline',
                                 labelStyle={'display': 'block', 'margin': '5px 0'}
-                            ),
-                            # Слайдер угла поворота подписей
-                            html.Label("Угол поворота подписей (градусы):", className="mt-3"),
-                            dcc.Slider(
-                                id='label-angle',
-                                min=-90, max=90, step=5,
-                                marks={-90: '-90', -45: '-45', 0: '0', 45: '45', 90: '90'},
-                                value=0,
-                                tooltip={"placement": "bottom", "always_visible": True}
                             ),
                             dbc.Button("🔄 Автонастройка оси Y",
                                        id="auto-y-btn",
