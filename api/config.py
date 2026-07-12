@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # OpenRouter — суммаризация текста через внешний LLM API
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    openrouter_model: str = "openai/gpt-4o-mini"
+    openrouter_model: str = "nvidia/nemotron-3-super-120b-a12b:free"
     # Заголовки, которые OpenRouter использует для рейтинга приложений на openrouter.ai/rankings
     openrouter_site_url: str = "https://github.com/phumigator/exodus"
     openrouter_app_name: str = "Exodus"
