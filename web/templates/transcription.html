@@ -35,7 +35,18 @@
             <h2>Чат с моделью OpenRouter</h2>
             <div class="chat-model-row">
                 <label for="chat-model">Модель:</label>
-                <input type="text" id="chat-model" placeholder="openai/gpt-4o-mini (по умолчанию)">
+                <select id="chat-model">
+                    <option value="">По умолчанию (openai/gpt-4o-mini)</option>
+                    <option value="nvidia/nemotron-3-ultra-550b-a55b:free">NVIDIA Nemotron 3 Ultra</option>
+                    <option value="nvidia/nemotron-3-super-120b-a12b:free">NVIDIA Nemotron 3 Super</option>
+                    <option value="deepseek/deepseek-r1">DeepSeek R1</option>
+                    <option value="poolside/laguna-m.1:free">Poolside Laguna M.1</option>
+                    <option value="qwen/qwen3.6-plus">Qwen 3.6 Plus</option>
+                    <option value="google/gemma-4-31b-it:free">Google Gemma 4 31B</option>
+                    <option value="minimax/minimax-m2.5">MiniMax M2.5</option>
+                    <option value="cohere/north-mini-code:free">Cohere North Mini Code</option>
+                    <option value="arcee-ai/trinity-large-thinking">Arcee Trinity Large Thinking</option>
+                </select>
                 <button type="button" id="chat-clear-btn">Очистить чат</button>
             </div>
             <div id="chat-history" class="chat-history"></div>
