@@ -45,8 +45,11 @@ async def _call_openrouter(messages: list[dict], model: str | None) -> str:
 
     # trust_env=False: игнорируем системные HTTP_PROXY/ALL_PROXY — на машине
     # ALL_PROXY использует схему "socks://", которую httpx не распознаёт,
-    # и AsyncClient падает ещё до подключения.
-    async with httpx.AsyncClient(timeout=120, trust_env=False) as client:
+    # и AsyncClient падает ещё до подключения. Прокси для OpenRouter (если нужен,
+    # т.к. прямые запросы блокируются) передаём явно через настройки.
+    async with httpx.AsyncClient(
+        timeout=120, trust_env=False, proxy=settings.openrouter_proxy_url
+    ) as client:
         try:
             response = await client.post(
                 f"{settings.openrouter_base_url}/chat/completions",
