@@ -1,6 +1,12 @@
 :root {
     --accent: #2c3e50;
     --bg: #f8f9fa;
+    --pip-bg: #050b06;
+    --pip-panel: #0d1912;
+    --pip-green: #39ff6a;
+    --pip-green-dim: #1f7a3d;
+    --pip-text: #7fe89c;
+    --pip-glow: 0 0 6px rgba(57, 255, 106, .8), 0 0 14px rgba(57, 255, 106, .35);
 }
 
 * {
@@ -247,4 +253,243 @@ textarea {
 .chat-form textarea {
     flex: 1;
     margin-bottom: 0;
+}
+
+/* ---------- Pip-Boy nav (site-wide, all pages) ---------- */
+
+.pipboy-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: .6rem 1.25rem;
+    background: linear-gradient(180deg, var(--pip-panel), var(--pip-bg));
+    border-bottom: 1px solid var(--pip-green-dim);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, .6);
+    font-family: "Courier New", ui-monospace, monospace;
+}
+
+.pipboy-nav::before,
+.pipboy-nav::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--pip-green-dim);
+}
+
+.pipboy-nav::before {
+    left: 3px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.pipboy-nav::after {
+    right: 3px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.pipboy-nav .brand {
+    color: var(--pip-green);
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-shadow: var(--pip-glow);
+    border: 1px solid var(--pip-green-dim);
+    padding: .2rem .7rem;
+}
+
+.pipboy-nav ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: 0;
+    padding: 0;
+}
+
+.pipboy-nav a {
+    color: var(--pip-green-dim);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-size: .85rem;
+    padding: .35rem .7rem;
+    border: 1px solid transparent;
+    transition: all .15s ease;
+}
+
+.pipboy-nav a:hover {
+    color: var(--pip-green);
+    text-shadow: var(--pip-glow);
+    border-color: var(--pip-green-dim);
+}
+
+.pipboy-nav a.active {
+    color: var(--pip-green);
+    text-shadow: var(--pip-glow);
+    border-color: var(--pip-green);
+    box-shadow: 0 0 8px rgba(57, 255, 106, .5) inset;
+}
+
+.pipboy-nav a.disabled {
+    opacity: .35;
+    pointer-events: none;
+}
+
+/* ---------- Pip-Boy full reskin: index / about / transcription ---------- */
+
+body.pipboy-page {
+    background: var(--pip-bg);
+    color: var(--pip-text);
+    font-family: "Courier New", ui-monospace, monospace;
+    position: relative;
+}
+
+body.pipboy-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, .15) 0px,
+        rgba(0, 0, 0, .15) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 1;
+}
+
+body.pipboy-page header {
+    background: linear-gradient(180deg, var(--pip-panel), var(--pip-bg));
+    color: var(--pip-green);
+    border-bottom: 1px solid var(--pip-green-dim);
+}
+
+body.pipboy-page header h1,
+body.pipboy-page header p {
+    text-shadow: var(--pip-glow);
+}
+
+body.pipboy-page h2 {
+    color: var(--pip-green);
+    text-shadow: var(--pip-glow);
+    border-bottom: 1px solid var(--pip-green-dim);
+    padding-bottom: .3rem;
+}
+
+body.pipboy-page a {
+    color: var(--pip-green);
+}
+
+body.pipboy-page .transcription-form,
+body.pipboy-page .chat-history,
+body.pipboy-page .summary-box {
+    background: rgba(13, 25, 18, .7);
+    border: 1px solid var(--pip-green-dim);
+    box-shadow: 0 0 12px rgba(57, 255, 106, .15);
+    color: var(--pip-green);
+}
+
+body.pipboy-page textarea,
+body.pipboy-page select,
+body.pipboy-page input[type="file"] {
+    background: #03150a;
+    color: var(--pip-green);
+    border: 1px solid var(--pip-green-dim);
+}
+
+body.pipboy-page button {
+    background: var(--pip-panel);
+    color: var(--pip-green);
+    border: 1px solid var(--pip-green);
+    text-shadow: var(--pip-glow);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    border-radius: 0;
+}
+
+body.pipboy-page button:hover:not(:disabled) {
+    background: var(--pip-green);
+    color: #03150a;
+    text-shadow: none;
+}
+
+body.pipboy-page .chat-message-user {
+    background: rgba(57, 255, 106, .15);
+    color: var(--pip-green);
+    border: 1px solid var(--pip-green-dim);
+}
+
+body.pipboy-page .chat-message-assistant {
+    background: rgba(10, 25, 15, .85);
+    color: var(--pip-green);
+    border: 1px solid var(--pip-green-dim);
+}
+
+body.pipboy-page .status {
+    color: var(--pip-green);
+    text-shadow: var(--pip-glow);
+}
+
+body.pipboy-page .status-error {
+    color: #ff5555;
+    text-shadow: 0 0 6px rgba(255, 85, 85, .6);
+}
+
+body.pipboy-page footer {
+    color: var(--pip-green-dim);
+    border-top: 1px solid var(--pip-green-dim);
+    position: relative;
+    z-index: 2;
+}
+
+body.pipboy-page .card {
+    background: rgba(13, 25, 18, .7);
+    border: 1px solid var(--pip-green-dim);
+    box-shadow: 0 0 12px rgba(57, 255, 106, .15);
+}
+
+body.pipboy-page .card:hover {
+    box-shadow: 0 0 18px rgba(57, 255, 106, .35);
+    border-color: var(--pip-green);
+}
+
+body.pipboy-page .card p {
+    color: var(--pip-text);
+}
+
+body.pipboy-page .badge {
+    background: transparent;
+    border: 1px solid var(--pip-green-dim);
+    color: var(--pip-green);
+}
+
+body.pipboy-page .badge.soon {
+    border-color: #a67c00;
+    color: #ffcf5c;
+}
+
+body.pipboy-page .skills li {
+    background: rgba(57, 255, 106, .08);
+    border: 1px solid var(--pip-green-dim);
+    color: var(--pip-text);
+}
+
+body.pipboy-page .timeline-item .period {
+    color: var(--pip-green);
+    text-shadow: var(--pip-glow);
+}
+
+body.pipboy-page .timeline-item strong {
+    color: var(--pip-green);
 }

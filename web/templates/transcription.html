@@ -6,11 +6,11 @@
     <title>Транскрибация и суммаризация — Exodus</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="pipboy-page">
+    {% include "_nav.html" %}
     <header>
         <h1>🎙️ Транскрибация и суммаризация</h1>
         <p>Загрузите аудио или видео — получите текст и краткую выжимку</p>
-        <nav><a href="/">&larr; на главную</a></nav>
     </header>
     <main>
         <form id="upload-form" class="transcription-form">

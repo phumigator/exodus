@@ -1,0 +1,15 @@
+{% set nav_links = [
+    ('/', 'Главная'),
+    ('/zcyc/', 'ZCYC'),
+    ('/transcription', 'Транскрибация'),
+    ('/about', 'Разработчик'),
+] %}
+<nav class="pipboy-nav">
+    <a class="brand" href="/">EXODUS</a>
+    <ul>
+        {% for href, label in nav_links %}
+        <li><a href="{{ href }}"{% if request.path == href %} class="active"{% endif %}>{{ label }}</a></li>
+        {% endfor %}
+        <li><a class="disabled" href="#" tabindex="-1">Аналитика</a></li>
+    </ul>
+</nav>
