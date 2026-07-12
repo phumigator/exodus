@@ -53,28 +53,40 @@ async def _call_openrouter(messages: list[dict], model: str | None) -> str:
         timeout=120, trust_env=False, proxy=settings.openrouter_proxy_url
     ) as client:
         # Бесплатные модели делят лимиты между всеми пользователями OpenRouter и
-        # периодически ловят транзиентный 429/404 (upstream rate-limit у провайдера,
-        # см. память проекта) — 3 попытки с паузой перед тем, как отдать ошибку клиенту.
-        for attempt in range(3):
+        # периодически ловят транзиентную нехватку мощности у провайдера (см. память
+        # проекта) — как HTTP 404/429, так и HTTP 200 с телом вида {"error": {...}}
+        # (например "Upstream error from Nvidia: ResourceExhausted"). Окно ретраев
+        # ~30 сек (5 попыток, паузы 3/6/9/12 сек) на оба варианта сбоя.
+        max_attempts = 5
+        data = None
+        for attempt in range(max_attempts):
             response = await client.post(
                 f"{settings.openrouter_base_url}/chat/completions",
                 json=payload,
                 headers=headers,
             )
-            if response.status_code in (404, 429) and attempt < 2:
-                await asyncio.sleep(2 * (attempt + 1))
+            is_last = attempt == max_attempts - 1
+            if response.status_code in (404, 429) and not is_last:
+                await asyncio.sleep(3 * (attempt + 1))
+                continue
+
+            try:
+                response.raise_for_status()
+            except httpx.HTTPError as exc:
+                if is_last:
+                    raise HTTPException(status_code=502, detail=f"OpenRouter API error: {exc}")
+                await asyncio.sleep(3 * (attempt + 1))
+                continue
+
+            data = response.json()
+            if "error" in data and not is_last:
+                await asyncio.sleep(3 * (attempt + 1))
                 continue
             break
 
-        try:
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
-            raise HTTPException(status_code=502, detail=f"OpenRouter API error: {exc}")
-
-    data = response.json()
     try:
         return data["choices"][0]["message"]["content"]
-    except (KeyError, IndexError):
+    except (KeyError, IndexError, TypeError):
         raise HTTPException(status_code=502, detail=f"Неожиданный ответ OpenRouter: {data}")
 
 
