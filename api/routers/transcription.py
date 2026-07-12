@@ -4,6 +4,8 @@
 Аудио передаётся в Whisper (распознавание речи, удалённый сервер),
 полученный текст — в OpenRouter (суммаризация через внешний LLM API).
 """
+import asyncio
+
 import httpx
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
@@ -50,12 +52,21 @@ async def _call_openrouter(messages: list[dict], model: str | None) -> str:
     async with httpx.AsyncClient(
         timeout=120, trust_env=False, proxy=settings.openrouter_proxy_url
     ) as client:
-        try:
+        # Бесплатные модели делят лимиты между всеми пользователями OpenRouter и
+        # периодически ловят транзиентный 429/404 (upstream rate-limit у провайдера,
+        # см. память проекта) — 3 попытки с паузой перед тем, как отдать ошибку клиенту.
+        for attempt in range(3):
             response = await client.post(
                 f"{settings.openrouter_base_url}/chat/completions",
                 json=payload,
                 headers=headers,
             )
+            if response.status_code in (404, 429) and attempt < 2:
+                await asyncio.sleep(2 * (attempt + 1))
+                continue
+            break
+
+        try:
             response.raise_for_status()
         except httpx.HTTPError as exc:
             raise HTTPException(status_code=502, detail=f"OpenRouter API error: {exc}")
