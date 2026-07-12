@@ -1,5 +1,5 @@
 """
-FastAPI-сервис Exodus: транскрибация/суммаризация и выгрузка аналитики.
+FastAPI-сервис Phumigator Exodus: транскрибация/суммаризация и выгрузка аналитики.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import settings
 from routers import transcription, analytics
 
-app = FastAPI(title="Exodus API")
+app = FastAPI(title="Phumigator Exodus API")
 
 app.add_middleware(
     CORSMiddleware,

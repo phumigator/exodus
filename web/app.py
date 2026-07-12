@@ -1,5 +1,5 @@
 """
-Главное Flask-приложение Exodus: монтирует Dash-дашборд и отдаёт статические разделы.
+Главное Flask-приложение Phumigator Exodus: монтирует Dash-дашборд и отдаёт статические разделы.
 """
 import os
 
@@ -35,7 +35,7 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    print("Запуск Exodus...")
+    print("Запуск Phumigator Exodus...")
     print("Главная страница: http://localhost:8888/")
     print("ZCYC Dashboard:    http://localhost:8888/zcyc/")
     app.run(debug=True, host="0.0.0.0", port=8888)

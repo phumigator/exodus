@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Exodus: Web (Flask + Dash)",
+            "name": "Phumigator Exodus: Web (Flask + Dash)",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/web/app.py",
@@ -12,7 +12,7 @@
             "justMyCode": true
         },
         {
-            "name": "Exodus: API (FastAPI)",
+            "name": "Phumigator Exodus: API (FastAPI)",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
@@ -25,8 +25,8 @@
     ],
     "compounds": [
         {
-            "name": "Exodus: Web + API",
-            "configurations": ["Exodus: Web (Flask + Dash)", "Exodus: API (FastAPI)"]
+            "name": "Phumigator Exodus: Web + API",
+            "configurations": ["Phumigator Exodus: Web (Flask + Dash)", "Phumigator Exodus: API (FastAPI)"]
         }
     ]
 }

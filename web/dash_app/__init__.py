@@ -13,7 +13,7 @@ from .callbacks_utils import register_callbacks as register_utils
 
 NAV_HTML = """
 <nav class="pipboy-nav">
-    <a class="brand" href="/">EXODUS</a>
+    <a class="brand" href="/">PHUMIGATOR EXODUS</a>
     <ul>
         <li><a href="/">Главная</a></li>
         <li><a href="/zcyc/" class="active">ZCYC</a></li>
