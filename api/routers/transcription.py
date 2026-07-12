@@ -43,7 +43,10 @@ async def _call_openrouter(messages: list[dict], model: str | None) -> str:
         "X-Title": settings.openrouter_app_name,
     }
 
-    async with httpx.AsyncClient(timeout=120) as client:
+    # trust_env=False: игнорируем системные HTTP_PROXY/ALL_PROXY — на машине
+    # ALL_PROXY использует схему "socks://", которую httpx не распознаёт,
+    # и AsyncClient падает ещё до подключения.
+    async with httpx.AsyncClient(timeout=120, trust_env=False) as client:
         try:
             response = await client.post(
                 f"{settings.openrouter_base_url}/chat/completions",
@@ -64,7 +67,7 @@ async def _call_openrouter(messages: list[dict], model: str | None) -> str:
 @router.post("/transcribe")
 async def transcribe(file: UploadFile = File(...)):
     """Отправляет файл в Whisper API и возвращает распознанный текст."""
-    async with httpx.AsyncClient(timeout=600) as client:
+    async with httpx.AsyncClient(timeout=600, trust_env=False) as client:
         files = {"file": (file.filename, await file.read(), file.content_type)}
         try:
             response = await client.post(
