@@ -1,0 +1,19 @@
+services:
+  bridge:
+    build: .
+    container_name: exodus-whisper-bridge
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "9000:8000"
+    networks:
+      - ai-network
+
+networks:
+  # Сеть уже работающего с VPS контейнера whisper-test (проект docker-stack,
+  # см. /home/kali/docker-stack/docker-compose.yml). Мост подключается к ней,
+  # чтобы обращаться к whisper-test по имени контейнера, не поднимая второй
+  # Whisper-контейнер.
+  ai-network:
+    external: true
+    name: docker-stack_ai-network

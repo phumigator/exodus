@@ -6,8 +6,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Удалённый сервер с Whisper
+    # Удалённый сервер с Whisper (whisper-bridge на локальной машине разработчика)
     whisper_api_base_url: str = "http://remote-host:9000"
+    # Общий секрет, отправляется в заголовке X-Internal-Token мосту whisper-bridge
+    whisper_shared_secret: str = ""
 
     # OpenRouter — суммаризация текста через внешний LLM API
     openrouter_api_key: str = ""

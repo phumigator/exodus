@@ -95,11 +95,13 @@ async def transcribe(file: UploadFile = File(...)):
     """Отправляет файл в Whisper API и возвращает распознанный текст."""
     async with httpx.AsyncClient(timeout=600, trust_env=False) as client:
         files = {"audio_file": (file.filename, await file.read(), file.content_type)}
+        headers = {"X-Internal-Token": settings.whisper_shared_secret}
         try:
             response = await client.post(
                 f"{settings.whisper_api_base_url}/asr",
                 params={"output": "json"},
                 files=files,
+                headers=headers,
             )
             response.raise_for_status()
         except httpx.HTTPError as exc:
