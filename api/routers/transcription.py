@@ -104,6 +104,15 @@ async def transcribe(file: UploadFile = File(...)):
                 headers=headers,
             )
             response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            # Мост ответил (жив), но отклонил запрос — например, аудиофайл нельзя
+            # декодировать, или неверный токен. Пробрасываем его настоящий статус
+            # и текст ошибки вместо общего 502, иначе реальная причина теряется.
+            try:
+                detail = exc.response.json().get("detail", exc.response.text)
+            except ValueError:
+                detail = exc.response.text
+            raise HTTPException(status_code=exc.response.status_code, detail=detail)
         except httpx.HTTPError as exc:
             raise HTTPException(status_code=502, detail=f"Whisper API error: {exc}")
 

@@ -92,6 +92,15 @@ async def asr(
                 files=files,
             )
             response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            # Whisper ответил (жив), но не смог обработать конкретный файл —
+            # например, пустой/битый аудиофайл, который ffmpeg не может декодировать.
+            # Это ошибка содержимого запроса, а не недоступность сервиса, поэтому 422,
+            # а не 502.
+            raise HTTPException(
+                status_code=422,
+                detail=f"Whisper не смог обработать аудиофайл: {exc.response.text}",
+            )
         except httpx.HTTPError as exc:
             raise HTTPException(status_code=502, detail=f"Внутренний Whisper недоступен: {exc}")
 
