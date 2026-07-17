@@ -4,6 +4,10 @@ Whisper-мост: принимает аудио от VPS (Exodus API), пров�
 текст через OpenRouter для исправления грамматики/смысла (не суммаризация)
 и возвращает результат в том же формате, что отдаёт сам Whisper.
 """
+import asyncio
+import os
+import tempfile
+
 import httpx
 from fastapi import FastAPI, File, Header, HTTPException, Query, UploadFile
 
@@ -30,6 +34,38 @@ CORRECTION_PROMPT = (
     "6. Ответ должен содержать только исправленный текст, без кавычек, "
     "префиксов вроде \"Исправленный текст:\" и без markdown-разметки."
 )
+
+
+async def _to_wav(data: bytes, filename: str | None) -> bytes:
+    """Перекодирует аудио в WAV через файлы на диске, а не через stdin-пайп.
+
+    Внутренний whisper-test декодирует входящий файл сам, но тоже через пайп —
+    а MP4/M4A-контейнеры с телефонов часто пишут индексный атом moov в конец
+    файла (длина записи неизвестна, пока она не остановлена), и без seek
+    ffmpeg до него не добирается: тихо возвращает пустой звук вместо ошибки.
+    WAV не требует seek для декодирования, поэтому проблема снимается для
+    любого входного контейнера/кодека.
+    """
+    suffix = os.path.splitext(filename or "")[1] or ".bin"
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        src_path = os.path.join(tmp_dir, f"input{suffix}")
+        dst_path = os.path.join(tmp_dir, "output.wav")
+        with open(src_path, "wb") as f:
+            f.write(data)
+
+        proc = await asyncio.create_subprocess_exec(
+            "ffmpeg", "-y", "-i", src_path, "-ar", "16000", "-ac", "1", dst_path,
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+        )
+        _, stderr = await proc.communicate()
+        if proc.returncode != 0:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Не удалось перекодировать аудиофайл: {stderr.decode(errors='replace')[-2000:]}",
+            )
+
+        with open(dst_path, "rb") as f:
+            return f.read()
 
 
 def _check_token(x_internal_token: str | None) -> None:
@@ -81,10 +117,10 @@ async def asr(
 ):
     _check_token(x_internal_token)
 
+    wav_bytes = await _to_wav(await audio_file.read(), audio_file.filename)
+
     async with httpx.AsyncClient(timeout=600, trust_env=False) as client:
-        files = {
-            "audio_file": (audio_file.filename, await audio_file.read(), audio_file.content_type)
-        }
+        files = {"audio_file": ("audio.wav", wav_bytes, "audio/wav")}
         try:
             response = await client.post(
                 f"{settings.whisper_internal_url}/asr",
