@@ -146,6 +146,11 @@ footer {
     box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
 }
 
+.transcription-form label,
+.transcription-form textarea {
+    flex-basis: 100%;
+}
+
 button {
     background: var(--accent);
     color: #fff;

@@ -9,7 +9,7 @@ import os
 import tempfile
 
 import httpx
-from fastapi import FastAPI, File, Header, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Query, UploadFile
 
 from config import settings
 
@@ -75,14 +75,14 @@ def _check_token(x_internal_token: str | None) -> None:
         raise HTTPException(status_code=401, detail="Неверный или отсутствующий X-Internal-Token")
 
 
-async def _correct_text(raw_text: str) -> str:
+async def _correct_text(raw_text: str, prompt: str | None = None) -> str:
     if not raw_text.strip() or not settings.openrouter_api_key:
         return raw_text
 
     payload = {
         "model": settings.openrouter_model,
         "messages": [
-            {"role": "system", "content": CORRECTION_PROMPT},
+            {"role": "system", "content": prompt or CORRECTION_PROMPT},
             {"role": "user", "content": raw_text},
         ],
     }
@@ -113,6 +113,7 @@ async def health():
 async def asr(
     audio_file: UploadFile = File(...),
     output: str = Query("json"),
+    correction_prompt: str | None = Form(None),
     x_internal_token: str | None = Header(None),
 ):
     _check_token(x_internal_token)
@@ -141,5 +142,5 @@ async def asr(
             raise HTTPException(status_code=502, detail=f"Внутренний Whisper недоступен: {exc}")
 
     raw = response.json()
-    corrected_text = await _correct_text(raw.get("text", ""))
+    corrected_text = await _correct_text(raw.get("text", ""), correction_prompt)
     return {"text": corrected_text}

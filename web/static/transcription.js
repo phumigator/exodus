@@ -34,8 +34,13 @@ form.addEventListener("submit", async (event) => {
     transcriptSection.hidden = true;
     showStatus("Распознаём речь, это может занять несколько минут...");
 
+    const correctionPrompt = document.getElementById("correction-prompt-input").value.trim();
+
     const formData = new FormData();
     formData.append("file", file);
+    if (correctionPrompt) {
+        formData.append("correction_prompt", correctionPrompt);
+    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/transcription/transcribe`, {
