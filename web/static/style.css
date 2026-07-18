@@ -170,6 +170,23 @@ button:disabled {
     cursor: not-allowed;
 }
 
+#file-input::file-selector-button,
+#file-input::-webkit-file-upload-button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 1.2rem 2.4rem;
+    font-size: 2rem;
+    cursor: pointer;
+    margin-right: 1rem;
+}
+
+#file-input::file-selector-button:hover,
+#file-input::-webkit-file-upload-button:hover {
+    opacity: .9;
+}
+
 .status {
     margin: 1rem 0;
     color: #495057;
@@ -430,6 +447,24 @@ body.pipboy-page button {
 }
 
 body.pipboy-page button:hover:not(:disabled) {
+    background: var(--pip-green);
+    color: #03150a;
+    text-shadow: none;
+}
+
+body.pipboy-page #file-input::file-selector-button,
+body.pipboy-page #file-input::-webkit-file-upload-button {
+    background: var(--pip-panel);
+    color: var(--pip-green);
+    border: 1px solid var(--pip-green);
+    text-shadow: var(--pip-glow);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    border-radius: 0;
+}
+
+body.pipboy-page #file-input::file-selector-button:hover,
+body.pipboy-page #file-input::-webkit-file-upload-button:hover {
     background: var(--pip-green);
     color: #03150a;
     text-shadow: none;

@@ -33,6 +33,9 @@
         <section id="transcript-section" hidden>
             <h2>Расшифровка</h2>
             <textarea id="transcript" rows="10"></textarea>
+            <div class="button-row">
+                <button type="button" id="download-transcript-btn">Скачать текст</button>
+            </div>
             <label for="summary-prompt-input">Промпт суммаризации:</label>
             <textarea id="summary-prompt-input" rows="6">Ты помощник, который делает краткую выжимку текста на русском языке. На вход подаётся расшифровка речи — она может содержать разговорные обороты, повторы и отступления.
 
@@ -43,7 +46,6 @@
 4. Ответ должен содержать только саму выжимку, без markdown-разметки и префиксов вроде "Выжимка:".</textarea>
             <div class="button-row">
                 <button type="button" id="summarize-btn">Суммаризировать</button>
-                <button type="button" id="download-transcript-btn">Скачать текст</button>
             </div>
         </section>
 
