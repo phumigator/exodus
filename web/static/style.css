@@ -6,7 +6,27 @@
     --pip-green: #39ff6a;
     --pip-green-dim: #1f7a3d;
     --pip-text: #7fe89c;
-    --pip-glow: 0 0 6px rgba(57, 255, 106, .8), 0 0 14px rgba(57, 255, 106, .35);
+    --pip-green-rgb: 57, 255, 106;
+    --pip-glow: 0 0 6px rgba(var(--pip-green-rgb), .8), 0 0 14px rgba(var(--pip-green-rgb), .35);
+    --pip-panel-tint-rgb: 13, 25, 18;
+    --pip-msg-rgb: 10, 25, 15;
+    --pip-input-bg: var(--pip-input-bg);
+}
+
+/* Английская версия — янтарная Pip-Boy палитра вместо зелёной (те же
+   переменные, RU остаётся зелёным по умолчанию). Фон/панели не трогаем,
+   меняется только акцентный цвет текста/свечения/рамок. */
+html[lang="en"] {
+    --pip-bg: #0b0904;
+    --pip-panel: #191208;
+    --pip-green: #ffb000;
+    --pip-green-dim: #8a5a12;
+    --pip-text: #e8b96a;
+    --pip-green-rgb: 255, 176, 0;
+    --pip-glow: 0 0 6px rgba(255, 176, 0, .8), 0 0 14px rgba(255, 176, 0, .35);
+    --pip-panel-tint-rgb: 25, 18, 6;
+    --pip-msg-rgb: 25, 18, 6;
+    --pip-input-bg: #150d02;
 }
 
 * {
@@ -364,7 +384,7 @@ textarea {
     color: var(--pip-green);
     text-shadow: var(--pip-glow);
     border-color: var(--pip-green);
-    box-shadow: 0 0 8px rgba(57, 255, 106, .5) inset;
+    box-shadow: 0 0 8px rgba(var(--pip-green-rgb), .5) inset;
 }
 
 .pipboy-nav a.disabled {
@@ -427,16 +447,16 @@ body.pipboy-page a {
 body.pipboy-page .transcription-form,
 body.pipboy-page .chat-history,
 body.pipboy-page .summary-box {
-    background: rgba(13, 25, 18, .7);
+    background: rgba(var(--pip-panel-tint-rgb), .7);
     border: 1px solid var(--pip-green-dim);
-    box-shadow: 0 0 12px rgba(57, 255, 106, .15);
+    box-shadow: 0 0 12px rgba(var(--pip-green-rgb), .15);
     color: var(--pip-green);
 }
 
 body.pipboy-page textarea,
 body.pipboy-page select,
 body.pipboy-page input[type="file"] {
-    background: #03150a;
+    background: var(--pip-input-bg);
     color: var(--pip-green);
     border: 1px solid var(--pip-green-dim);
 }
@@ -453,7 +473,7 @@ body.pipboy-page button {
 
 body.pipboy-page button:hover:not(:disabled) {
     background: var(--pip-green);
-    color: #03150a;
+    color: var(--pip-input-bg);
     text-shadow: none;
 }
 
@@ -471,18 +491,18 @@ body.pipboy-page #file-input::-webkit-file-upload-button {
 body.pipboy-page #file-input::file-selector-button:hover,
 body.pipboy-page #file-input::-webkit-file-upload-button:hover {
     background: var(--pip-green);
-    color: #03150a;
+    color: var(--pip-input-bg);
     text-shadow: none;
 }
 
 body.pipboy-page .chat-message-user {
-    background: rgba(57, 255, 106, .15);
+    background: rgba(var(--pip-green-rgb), .15);
     color: var(--pip-green);
     border: 1px solid var(--pip-green-dim);
 }
 
 body.pipboy-page .chat-message-assistant {
-    background: rgba(10, 25, 15, .85);
+    background: rgba(var(--pip-msg-rgb), .85);
     color: var(--pip-green);
     border: 1px solid var(--pip-green-dim);
 }
@@ -505,13 +525,13 @@ body.pipboy-page footer {
 }
 
 body.pipboy-page .card {
-    background: rgba(13, 25, 18, .7);
+    background: rgba(var(--pip-panel-tint-rgb), .7);
     border: 1px solid var(--pip-green-dim);
-    box-shadow: 0 0 12px rgba(57, 255, 106, .15);
+    box-shadow: 0 0 12px rgba(var(--pip-green-rgb), .15);
 }
 
 body.pipboy-page .card:hover {
-    box-shadow: 0 0 18px rgba(57, 255, 106, .35);
+    box-shadow: 0 0 18px rgba(var(--pip-green-rgb), .35);
     border-color: var(--pip-green);
 }
 
@@ -531,7 +551,7 @@ body.pipboy-page .badge.soon {
 }
 
 body.pipboy-page .skills li {
-    background: rgba(57, 255, 106, .08);
+    background: rgba(var(--pip-green-rgb), .08);
     border: 1px solid var(--pip-green-dim);
     color: var(--pip-text);
 }
