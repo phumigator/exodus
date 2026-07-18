@@ -1,92 +1,79 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ g.lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Транскрибация и суммаризация — Phumigator Exodus</title>
+    <title>{{ t('transcription_page_title') }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="pipboy-page">
     {% include "_nav.html" %}
     <header>
-        <h1>🎙️ Транскрибация и суммаризация</h1>
-        <p>Загрузите аудио или видео — получите текст и краткую выжимку</p>
+        <h1>{{ t('transcription_header_title') }}</h1>
+        <p>{{ t('transcription_header_subtitle') }}</p>
     </header>
     <main>
         <div class="model-select-row">
-            <label for="model-select">Модель OpenRouter (коррекция, суммаризация, чат):</label>
+            <label for="model-select">{{ t('model_select_label') }}</label>
             <select id="model-select">
-                <option value="google/gemma-4-31b-it:free" disabled>Google Gemma 4 31B (нестабильно)</option>
+                <option value="google/gemma-4-31b-it:free" disabled>{{ t('model_gemma_label') }}</option>
                 <option value="nvidia/nemotron-3-ultra-550b-a55b:free">NVIDIA Nemotron 3 Ultra (free)</option>
                 <option value="nvidia/nemotron-3-super-120b-a12b:free">NVIDIA Nemotron 3 Super (free)</option>
-                <option value="poolside/laguna-m.1:free" disabled>Poolside Laguna M.1 (отключается 28.07.2026)</option>
+                <option value="poolside/laguna-m.1:free" disabled>{{ t('model_laguna_label') }}</option>
                 <option value="cohere/north-mini-code:free">Cohere North Mini Code (free)</option>
             </select>
         </div>
 
         <form id="upload-form" class="transcription-form">
             <input type="file" id="file-input" name="file" accept="audio/*,video/*" required>
-            <label for="correction-prompt-input">Промпт коррекции распознанного текста:</label>
-            <textarea id="correction-prompt-input" rows="8">Ты корректор транскрипций. На вход подаётся сырой текст, распознанный речевым движком (Whisper) — в нём встречаются ошибки распознавания: неверно услышанные слова, пропущенные/лишние знаки препинания, неправильная сегментация предложений, слитые или разорванные слова. Твоя задача — только исправить эти ошибки распознавания речи, восстановив наиболее вероятный исходный текст.
-
-Строго соблюдай:
-1. Не думай вслух, не показывай рассуждения — сразу выдай финальный результат.
-2. Не добавляй ничего от себя: ни новых фактов, ни пояснений, ни оценок, ни предупреждений о недостатке контекста.
-3. Не суммаризируй и не сокращай — длина и структура текста должны остаться теми же, меняются только ошибочные слова и пунктуация.
-4. Сохраняй исходный язык, стиль и смысл текста как есть, даже если он разговорный, незаконченный или бессвязный.
-5. Если текст пустой или уже корректен — верни его без изменений.
-6. Ответ должен содержать только исправленный текст, без кавычек, префиксов вроде "Исправленный текст:" и без markdown-разметки.</textarea>
-            <button type="submit" id="transcribe-btn">Распознать речь</button>
+            <label for="correction-prompt-input">{{ t('correction_prompt_label') }}</label>
+            <textarea id="correction-prompt-input" rows="8">{{ t('correction_prompt_default') }}</textarea>
+            <button type="submit" id="transcribe-btn">{{ t('transcribe_btn') }}</button>
         </form>
 
         <p id="status" class="status" hidden></p>
 
         <section id="transcript-section" hidden>
-            <h2>Расшифровка</h2>
+            <h2>{{ t('transcript_heading') }}</h2>
             <textarea id="transcript" rows="10"></textarea>
             <div class="button-row">
-                <button type="button" id="download-transcript-btn">Скачать текст</button>
+                <button type="button" id="download-transcript-btn">{{ t('download_transcript_btn') }}</button>
             </div>
-            <label for="summary-prompt-input">Промпт суммаризации:</label>
-            <textarea id="summary-prompt-input" rows="6">Ты помощник, который делает краткую выжимку текста на русском языке. На вход подаётся расшифровка речи — она может содержать разговорные обороты, повторы и отступления.
-
-Строго соблюдай:
-1. Выдели только ключевые мысли, факты и решения — без второстепенных деталей и дословных повторов.
-2. Не добавляй ничего от себя: ни новых фактов, ни оценок, ни выводов, которых нет в исходном тексте.
-3. Сохраняй исходный смысл и порядок изложения, но формулируй кратко и связно.
-4. Ответ должен содержать только саму выжимку, без markdown-разметки и префиксов вроде "Выжимка:".</textarea>
+            <label for="summary-prompt-input">{{ t('summary_prompt_label') }}</label>
+            <textarea id="summary-prompt-input" rows="6">{{ t('summary_prompt_default') }}</textarea>
             <div class="button-row">
-                <button type="button" id="summarize-btn">Суммаризировать</button>
+                <button type="button" id="summarize-btn">{{ t('summarize_btn') }}</button>
             </div>
         </section>
 
         <section id="summary-section" hidden>
-            <h2>Краткая выжимка</h2>
+            <h2>{{ t('summary_heading') }}</h2>
             <div id="summary" class="summary-box"></div>
             <div class="button-row">
-                <button type="button" id="download-summary-btn">Скачать выжимку</button>
+                <button type="button" id="download-summary-btn">{{ t('download_summary_btn') }}</button>
             </div>
         </section>
 
         <section id="chat-section">
-            <h2>Чат с моделью OpenRouter</h2>
+            <h2>{{ t('chat_heading') }}</h2>
             <div class="button-row">
-                <button type="button" id="chat-clear-btn">Очистить чат</button>
+                <button type="button" id="chat-clear-btn">{{ t('chat_clear_btn') }}</button>
             </div>
             <div id="chat-history" class="chat-history"></div>
             <form id="chat-form" class="chat-form">
-                <textarea id="chat-input" rows="2" placeholder="Введите сообщение..." required></textarea>
-                <button type="submit" id="chat-send-btn">Отправить</button>
+                <textarea id="chat-input" rows="2" placeholder="{{ t('chat_input_placeholder') }}" required></textarea>
+                <button type="submit" id="chat-send-btn">{{ t('chat_send_btn') }}</button>
             </form>
             <p id="chat-status" class="status" hidden></p>
         </section>
     </main>
     <footer>
-        Phumigator Exodus &mdash; <a href="/about">о разработчике</a>
+        Phumigator Exodus &mdash; <a href="/about">{{ t('footer_about_link') }}</a>
     </footer>
 
     <script>
         const API_BASE_URL = {{ api_base_url | tojson }};
+        const I18N = {{ i18n_json | tojson }};
     </script>
     <script src="{{ url_for('static', filename='transcription.js') }}"></script>
 </body>

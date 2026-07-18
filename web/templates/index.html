@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ g.lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,37 +10,37 @@
     {% include "_nav.html" %}
     <header>
         <h1>Phumigator Exodus</h1>
-        <p>Платформа аналитических и AI-сервисов</p>
+        <p>{{ t('index_subtitle') }}</p>
     </header>
     <main>
         <div class="cards">
             <a class="card" href="/zcyc/">
-                <span class="badge">Доступно</span>
-                <h2>📊 ZCYC Dashboard</h2>
-                <p>Кривая бескупонной доходности и анализ облигаций по ИНН.</p>
+                <span class="badge">{{ t('badge_available') }}</span>
+                <h2>{{ t('card_zcyc_title') }}</h2>
+                <p>{{ t('card_zcyc_desc') }}</p>
             </a>
 
             <a class="card" href="/transcription">
-                <span class="badge">Доступно</span>
-                <h2>🎙️ Транскрибация и суммаризация</h2>
-                <p>Загрузка аудио/видео, распознавание речи (Whisper) и суммаризация (OpenRouter).</p>
+                <span class="badge">{{ t('badge_available') }}</span>
+                <h2>{{ t('card_transcription_title') }}</h2>
+                <p>{{ t('card_transcription_desc') }}</p>
             </a>
 
             <a class="card" href="/api/docs">
-                <span class="badge soon">В разработке</span>
-                <h2>📈 Аналитика</h2>
-                <p>Выгрузка и просмотр аналитики из базы данных Postgres.</p>
+                <span class="badge soon">{{ t('badge_soon') }}</span>
+                <h2>{{ t('card_analytics_title') }}</h2>
+                <p>{{ t('card_analytics_desc') }}</p>
             </a>
 
             <a class="card" href="/about">
-                <span class="badge">Доступно</span>
-                <h2>👤 О разработчике</h2>
-                <p>Опыт, навыки и контакты автора этих сервисов.</p>
+                <span class="badge">{{ t('badge_available') }}</span>
+                <h2>{{ t('card_about_title') }}</h2>
+                <p>{{ t('card_about_desc') }}</p>
             </a>
         </div>
     </main>
     <footer>
-        Phumigator Exodus &mdash; <a href="/about">о разработчике</a>
+        Phumigator Exodus &mdash; <a href="/about">{{ t('footer_about_link') }}</a>
     </footer>
 </body>
 </html>

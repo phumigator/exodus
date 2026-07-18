@@ -1,8 +1,8 @@
 {% set nav_links = [
-    ('/', 'Главная'),
-    ('/zcyc/', 'ZCYC'),
-    ('/transcription', 'Транскрибация'),
-    ('/about', 'Разработчик'),
+    ('/', t('nav_home')),
+    ('/zcyc/', t('nav_zcyc')),
+    ('/transcription', t('nav_transcription')),
+    ('/about', t('nav_about')),
 ] %}
 <nav class="pipboy-nav">
     <a class="brand" href="/">PHUMIGATOR EXODUS</a>
@@ -10,6 +10,10 @@
         {% for href, label in nav_links %}
         <li><a href="{{ href }}"{% if request.path == href %} class="active"{% endif %}>{{ label }}</a></li>
         {% endfor %}
-        <li><a class="disabled" href="#" tabindex="-1">Аналитика</a></li>
+        <li><a class="disabled" href="#" tabindex="-1">{{ t('nav_analytics') }}</a></li>
     </ul>
+    <div class="lang-switch">
+        <a href="/set-language?lang=ru&next={{ request.path }}"{% if g.lang == 'ru' %} class="active"{% endif %}>RU</a>
+        <a href="/set-language?lang=en&next={{ request.path }}"{% if g.lang == 'en' %} class="active"{% endif %}>EN</a>
+    </div>
 </nav>

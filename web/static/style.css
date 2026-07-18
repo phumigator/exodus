@@ -372,6 +372,11 @@ textarea {
     pointer-events: none;
 }
 
+.pipboy-nav .lang-switch {
+    display: flex;
+    gap: .3rem;
+}
+
 /* ---------- Pip-Boy full reskin: index / about / transcription ---------- */
 
 body.pipboy-page {

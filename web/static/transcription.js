@@ -43,7 +43,7 @@ form.addEventListener("submit", async (event) => {
     transcribeBtn.disabled = true;
     summarySection.hidden = true;
     transcriptSection.hidden = true;
-    showStatus("Распознаём речь, это может занять несколько минут...");
+    showStatus(I18N.js_status_recognizing);
 
     const correctionPrompt = document.getElementById("correction-prompt-input").value.trim();
     const model = modelSelect.value.trim();
@@ -68,9 +68,9 @@ form.addEventListener("submit", async (event) => {
         const data = await response.json();
         transcriptEl.value = data.text || JSON.stringify(data);
         transcriptSection.hidden = false;
-        showStatus("Готово.");
+        showStatus(I18N.js_status_done);
     } catch (err) {
-        showStatus(`Ошибка распознавания: ${err.message}`, true);
+        showStatus(`${I18N.js_error_recognition_prefix}${err.message}`, true);
     } finally {
         transcribeBtn.disabled = false;
     }
@@ -113,7 +113,7 @@ chatForm.addEventListener("submit", async (event) => {
     chatInput.value = "";
 
     chatSendBtn.disabled = true;
-    showChatStatus("Модель отвечает...");
+    showChatStatus(I18N.js_chat_thinking);
 
     try {
         const response = await fetch(`${API_BASE_URL}/transcription/chat`, {
@@ -132,7 +132,7 @@ chatForm.addEventListener("submit", async (event) => {
         renderChatHistory();
         showChatStatus("");
     } catch (err) {
-        showChatStatus(`Ошибка чата: ${err.message}`, true);
+        showChatStatus(`${I18N.js_error_chat_prefix}${err.message}`, true);
     } finally {
         chatSendBtn.disabled = false;
     }
@@ -149,7 +149,7 @@ summarizeBtn.addEventListener("click", async () => {
     if (!text) return;
 
     summarizeBtn.disabled = true;
-    showStatus("Суммаризируем текст...");
+    showStatus(I18N.js_status_summarizing);
 
     const summaryPrompt = document.getElementById("summary-prompt-input").value.trim();
 
@@ -169,9 +169,9 @@ summarizeBtn.addEventListener("click", async () => {
         const data = await response.json();
         summaryEl.textContent = data.summary;
         summarySection.hidden = false;
-        showStatus("Готово.");
+        showStatus(I18N.js_status_done);
     } catch (err) {
-        showStatus(`Ошибка суммаризации: ${err.message}`, true);
+        showStatus(`${I18N.js_error_summarization_prefix}${err.message}`, true);
     } finally {
         summarizeBtn.disabled = false;
     }
