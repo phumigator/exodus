@@ -13,6 +13,17 @@
         <p>Загрузите аудио или видео — получите текст и краткую выжимку</p>
     </header>
     <main>
+        <div class="model-select-row">
+            <label for="model-select">Модель OpenRouter (коррекция, суммаризация, чат):</label>
+            <select id="model-select">
+                <option value="google/gemma-4-31b-it:free" disabled>Google Gemma 4 31B (нестабильно)</option>
+                <option value="nvidia/nemotron-3-ultra-550b-a55b:free">NVIDIA Nemotron 3 Ultra (free)</option>
+                <option value="nvidia/nemotron-3-super-120b-a12b:free">NVIDIA Nemotron 3 Super (free)</option>
+                <option value="poolside/laguna-m.1:free">Poolside Laguna M.1 (free)</option>
+                <option value="cohere/north-mini-code:free">Cohere North Mini Code (free)</option>
+            </select>
+        </div>
+
         <form id="upload-form" class="transcription-form">
             <input type="file" id="file-input" name="file" accept="audio/*,video/*" required>
             <label for="correction-prompt-input">Промпт коррекции распознанного текста:</label>
@@ -59,15 +70,7 @@
 
         <section id="chat-section">
             <h2>Чат с моделью OpenRouter</h2>
-            <div class="chat-model-row">
-                <label for="chat-model">Модель:</label>
-                <select id="chat-model">
-                    <option value="google/gemma-4-31b-it:free" disabled>Google Gemma 4 31B (нестабильно)</option>
-                    <option value="nvidia/nemotron-3-ultra-550b-a55b:free">NVIDIA Nemotron 3 Ultra (free)</option>
-                    <option value="nvidia/nemotron-3-super-120b-a12b:free">NVIDIA Nemotron 3 Super (free)</option>
-                    <option value="poolside/laguna-m.1:free">Poolside Laguna M.1 (free)</option>
-                    <option value="cohere/north-mini-code:free">Cohere North Mini Code (free)</option>
-                </select>
+            <div class="button-row">
                 <button type="button" id="chat-clear-btn">Очистить чат</button>
             </div>
             <div id="chat-history" class="chat-history"></div>

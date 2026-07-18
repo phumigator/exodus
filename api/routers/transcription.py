@@ -95,11 +95,20 @@ async def _call_openrouter(messages: list[dict], model: str | None) -> str:
 
 
 @router.post("/transcribe")
-async def transcribe(file: UploadFile = File(...), correction_prompt: str | None = Form(None)):
+async def transcribe(
+    file: UploadFile = File(...),
+    correction_prompt: str | None = Form(None),
+    correction_model: str | None = Form(None),
+):
     """Отправляет файл в Whisper API и возвращает распознанный текст."""
     async with httpx.AsyncClient(timeout=1800, trust_env=False) as client:
         files = {"audio_file": (file.filename, await file.read(), file.content_type)}
-        data = {"correction_prompt": correction_prompt} if correction_prompt else None
+        data = {}
+        if correction_prompt:
+            data["correction_prompt"] = correction_prompt
+        if correction_model:
+            data["correction_model"] = correction_model
+        data = data or None
         headers = {"X-Internal-Token": settings.whisper_shared_secret}
         try:
             response = await client.post(

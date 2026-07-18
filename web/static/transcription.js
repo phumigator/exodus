@@ -6,6 +6,7 @@ const transcriptSection = document.getElementById("transcript-section");
 const transcriptEl = document.getElementById("transcript");
 const summarySection = document.getElementById("summary-section");
 const summaryEl = document.getElementById("summary");
+const modelSelect = document.getElementById("model-select");
 
 function showStatus(message, isError = false) {
     statusEl.textContent = message;
@@ -45,11 +46,15 @@ form.addEventListener("submit", async (event) => {
     showStatus("Распознаём речь, это может занять несколько минут...");
 
     const correctionPrompt = document.getElementById("correction-prompt-input").value.trim();
+    const model = modelSelect.value.trim();
 
     const formData = new FormData();
     formData.append("file", file);
     if (correctionPrompt) {
         formData.append("correction_prompt", correctionPrompt);
+    }
+    if (model) {
+        formData.append("correction_model", model);
     }
 
     try {
@@ -73,7 +78,6 @@ form.addEventListener("submit", async (event) => {
 
 const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
-const chatModelInput = document.getElementById("chat-model");
 const chatHistoryEl = document.getElementById("chat-history");
 const chatSendBtn = document.getElementById("chat-send-btn");
 const chatClearBtn = document.getElementById("chat-clear-btn");
@@ -117,7 +121,7 @@ chatForm.addEventListener("submit", async (event) => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 messages: chatHistory,
-                model: chatModelInput.value.trim() || null,
+                model: modelSelect.value.trim() || null,
             }),
         });
         if (!response.ok) {
@@ -153,7 +157,11 @@ summarizeBtn.addEventListener("click", async () => {
         const response = await fetch(`${API_BASE_URL}/transcription/summarize`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, prompt: summaryPrompt || null }),
+            body: JSON.stringify({
+                text,
+                prompt: summaryPrompt || null,
+                model: modelSelect.value.trim() || null,
+            }),
         });
         if (!response.ok) {
             throw new Error(await parseError(response));

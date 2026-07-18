@@ -75,12 +75,12 @@ def _check_token(x_internal_token: str | None) -> None:
         raise HTTPException(status_code=401, detail="Неверный или отсутствующий X-Internal-Token")
 
 
-async def _correct_text(raw_text: str, prompt: str | None = None) -> str:
+async def _correct_text(raw_text: str, prompt: str | None = None, model: str | None = None) -> str:
     if not raw_text.strip() or not settings.openrouter_api_key:
         return raw_text
 
     payload = {
-        "model": settings.openrouter_model,
+        "model": model or settings.openrouter_model,
         "messages": [
             {"role": "system", "content": prompt or CORRECTION_PROMPT},
             {"role": "user", "content": raw_text},
@@ -114,6 +114,7 @@ async def asr(
     audio_file: UploadFile = File(...),
     output: str = Query("json"),
     correction_prompt: str | None = Form(None),
+    correction_model: str | None = Form(None),
     x_internal_token: str | None = Header(None),
 ):
     _check_token(x_internal_token)
@@ -142,5 +143,5 @@ async def asr(
             raise HTTPException(status_code=502, detail=f"Внутренний Whisper недоступен: {exc}")
 
     raw = response.json()
-    corrected_text = await _correct_text(raw.get("text", ""), correction_prompt)
+    corrected_text = await _correct_text(raw.get("text", ""), correction_prompt, correction_model)
     return {"text": corrected_text}
