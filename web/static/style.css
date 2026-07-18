@@ -176,8 +176,8 @@ button:disabled {
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 1.2rem 2.4rem;
-    font-size: 2rem;
+    padding: .6rem 1.2rem;
+    font-size: 1rem;
     cursor: pointer;
     margin-right: 1rem;
 }
