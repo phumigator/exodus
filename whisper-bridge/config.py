@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # OpenRouter — коррекция грамматики/смысла распознанного текста
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    openrouter_model: str = "tencent/hy3:free"
+    openrouter_model: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
 
     class Config:
         env_file = ".env"
