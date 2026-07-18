@@ -120,7 +120,7 @@ async def asr(
 
     wav_bytes = await _to_wav(await audio_file.read(), audio_file.filename)
 
-    async with httpx.AsyncClient(timeout=600, trust_env=False) as client:
+    async with httpx.AsyncClient(timeout=1800, trust_env=False) as client:
         files = {"audio_file": ("audio.wav", wav_bytes, "audio/wav")}
         try:
             response = await client.post(
