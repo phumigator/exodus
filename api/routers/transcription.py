@@ -15,9 +15,13 @@ from config import settings
 router = APIRouter(prefix="/transcription", tags=["transcription"])
 
 
+DEFAULT_SUMMARY_PROMPT = "Ты помощник, который делает краткую выжимку текста на русском языке."
+
+
 class SummarizeRequest(BaseModel):
     text: str
     model: str | None = None
+    prompt: str | None = None
 
 
 class ChatMessage(BaseModel):
@@ -127,7 +131,7 @@ async def summarize(request: SummarizeRequest):
     messages = [
         {
             "role": "system",
-            "content": "Ты помощник, который делает краткую выжимку текста на русском языке.",
+            "content": request.prompt or DEFAULT_SUMMARY_PROMPT,
         },
         {
             "role": "user",

@@ -22,6 +22,16 @@ async function parseError(response) {
     }
 }
 
+function downloadText(filename, text) {
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -137,11 +147,13 @@ summarizeBtn.addEventListener("click", async () => {
     summarizeBtn.disabled = true;
     showStatus("Суммаризируем текст...");
 
+    const summaryPrompt = document.getElementById("summary-prompt-input").value.trim();
+
     try {
         const response = await fetch(`${API_BASE_URL}/transcription/summarize`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text }),
+            body: JSON.stringify({ text, prompt: summaryPrompt || null }),
         });
         if (!response.ok) {
             throw new Error(await parseError(response));
@@ -155,4 +167,12 @@ summarizeBtn.addEventListener("click", async () => {
     } finally {
         summarizeBtn.disabled = false;
     }
+});
+
+document.getElementById("download-transcript-btn").addEventListener("click", () => {
+    downloadText("transcript.txt", transcriptEl.value);
+});
+
+document.getElementById("download-summary-btn").addEventListener("click", () => {
+    downloadText("summary.txt", summaryEl.textContent);
 });

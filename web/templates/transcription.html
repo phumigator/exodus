@@ -33,12 +33,26 @@
         <section id="transcript-section" hidden>
             <h2>Расшифровка</h2>
             <textarea id="transcript" rows="10"></textarea>
-            <button type="button" id="summarize-btn">Суммаризировать</button>
+            <label for="summary-prompt-input">Промпт суммаризации:</label>
+            <textarea id="summary-prompt-input" rows="6">Ты помощник, который делает краткую выжимку текста на русском языке. На вход подаётся расшифровка речи — она может содержать разговорные обороты, повторы и отступления.
+
+Строго соблюдай:
+1. Выдели только ключевые мысли, факты и решения — без второстепенных деталей и дословных повторов.
+2. Не добавляй ничего от себя: ни новых фактов, ни оценок, ни выводов, которых нет в исходном тексте.
+3. Сохраняй исходный смысл и порядок изложения, но формулируй кратко и связно.
+4. Ответ должен содержать только саму выжимку, без markdown-разметки и префиксов вроде "Выжимка:".</textarea>
+            <div class="button-row">
+                <button type="button" id="summarize-btn">Суммаризировать</button>
+                <button type="button" id="download-transcript-btn">Скачать текст</button>
+            </div>
         </section>
 
         <section id="summary-section" hidden>
             <h2>Краткая выжимка</h2>
             <div id="summary" class="summary-box"></div>
+            <div class="button-row">
+                <button type="button" id="download-summary-btn">Скачать выжимку</button>
+            </div>
         </section>
 
         <section id="chat-section">

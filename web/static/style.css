@@ -183,6 +183,12 @@ button:disabled {
     margin-top: 1.5rem;
 }
 
+.button-row {
+    display: flex;
+    gap: .75rem;
+    flex-wrap: wrap;
+}
+
 textarea {
     width: 100%;
     font-family: inherit;
