@@ -12,6 +12,19 @@ from .i18n import t, pip_colors
 CURVE_POINTS = 1500
 
 
+def _text_color_for_bg(bg_hex, text_fallback, grid_fallback):
+    """Тёмный текст/сетка для светлых фонов (сейчас актуально только для белого
+    в _bg_color_options), иначе — обычные цвета темы (зелёный/янтарный)."""
+    try:
+        r, g, b = int(bg_hex[1:3], 16), int(bg_hex[3:5], 16), int(bg_hex[5:7], 16)
+        luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    except (TypeError, ValueError):
+        return text_fallback, grid_fallback
+    if luminance > 0.6:
+        return '#1a1a1a', '#999999'
+    return text_fallback, grid_fallback
+
+
 def register_callbacks(app):
     """Регистрирует колбэки, связанные с кривой и графиком."""
 
@@ -108,6 +121,7 @@ def register_callbacks(app):
         # Ручной выбор фона (dropdown 'chart-bg-color') переопределяет фон темы,
         # пока не выбран пункт "По умолчанию" (value='auto').
         bg_color = chart_bg_color if chart_bg_color and chart_bg_color != 'auto' else colors['panel']
+        text_color, grid_color = _text_color_for_bg(bg_color, colors['text'], colors['dim'])
 
         if not curve_data:
             empty_fig = go.Figure()
@@ -117,7 +131,7 @@ def register_callbacks(app):
                 yaxis_title=t('zcyc_y_axis_title'),
                 plot_bgcolor=bg_color,
                 paper_bgcolor=bg_color,
-                font=dict(color=colors['text']),
+                font=dict(color=text_color),
                 height=500
             )
             return empty_fig
@@ -130,7 +144,7 @@ def register_callbacks(app):
                     title=t('zcyc_curve_data_empty') if show_title else "",
                     plot_bgcolor=bg_color,
                     paper_bgcolor=bg_color,
-                    font=dict(color=colors['text']),
+                    font=dict(color=text_color),
                     height=500,
                 )
                 return empty_fig
@@ -248,7 +262,7 @@ def register_callbacks(app):
                 title=t('zcyc_x_axis_title'),
                 showgrid=show_grid,
                 gridwidth=1,
-                gridcolor=colors['dim'],
+                gridcolor=grid_color,
                 griddash='solid'
             )
             yaxis_layout = dict(
@@ -256,7 +270,7 @@ def register_callbacks(app):
                 range=y_range,
                 showgrid=show_grid,
                 gridwidth=1,
-                gridcolor=colors['dim'],
+                gridcolor=grid_color,
                 griddash='solid'
             )
 
@@ -267,10 +281,10 @@ def register_callbacks(app):
                 hovermode='closest',
                 showlegend=show_legend,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
-                            font=dict(color=colors['text'])),
+                            font=dict(color=text_color)),
                 plot_bgcolor=bg_color,
                 paper_bgcolor=bg_color,
-                font=dict(color=colors['text']),
+                font=dict(color=text_color),
                 height=500
             )
 
@@ -285,7 +299,7 @@ def register_callbacks(app):
                 title=f"{t('zcyc_error_prefix')}{str(e)}" if show_title else "",
                 plot_bgcolor=bg_color,
                 paper_bgcolor=bg_color,
-                font=dict(color=colors['text']),
+                font=dict(color=text_color),
             )
             return empty_fig
 

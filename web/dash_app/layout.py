@@ -51,9 +51,10 @@ def _point_color_options():
 
 
 def _bg_color_options():
-    """8 базовых цветов фона графика (тёмные, приглушённые оттенки — чтобы
-    зелёный/янтарный текст поверх оставался читаемым); 'auto' возвращает
-    фон к цвету текущей языковой темы (см. update_plots в callbacks_curve.py)."""
+    """Базовые цвета фона графика: тёмные приглушённые оттенки (чтобы зелёный/
+    янтарный текст поверх оставался читаемым) плюс белый — для белого шрифт/
+    сетка графика переключаются на тёмные (см. _text_color_for_bg в
+    callbacks_curve.py). 'auto' возвращает фон к цвету текущей языковой темы."""
     return [
         {'label': t('zcyc_bg_default'), 'value': 'auto'},
         {'label': f"🔴 {t('zcyc_color_red')}", 'value': '#2a0e0e'},
@@ -64,6 +65,7 @@ def _bg_color_options():
         {'label': f"⚫ {t('zcyc_color_black')}", 'value': '#050505'},
         {'label': f"🟡 {t('zcyc_color_yellow')}", 'value': '#2a260e'},
         {'label': f"⬜ {t('zcyc_color_gray')}", 'value': '#16181a'},
+        {'label': f"⚪ {t('zcyc_color_white')}", 'value': '#ffffff'},
     ]
 
 
