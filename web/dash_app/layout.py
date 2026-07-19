@@ -50,6 +50,23 @@ def _point_color_options():
     ]
 
 
+def _bg_color_options():
+    """8 базовых цветов фона графика (тёмные, приглушённые оттенки — чтобы
+    зелёный/янтарный текст поверх оставался читаемым); 'auto' возвращает
+    фон к цвету текущей языковой темы (см. update_plots в callbacks_curve.py)."""
+    return [
+        {'label': t('zcyc_bg_default'), 'value': 'auto'},
+        {'label': f"🔴 {t('zcyc_color_red')}", 'value': '#2a0e0e'},
+        {'label': f"🔵 {t('zcyc_color_blue')}", 'value': '#0e1a2a'},
+        {'label': f"🟢 {t('zcyc_color_green')}", 'value': '#0e2a16'},
+        {'label': f"🟣 {t('zcyc_color_purple')}", 'value': '#1e0e2a'},
+        {'label': f"🟠 {t('zcyc_color_orange')}", 'value': '#2a1c0e'},
+        {'label': f"⚫ {t('zcyc_color_black')}", 'value': '#050505'},
+        {'label': f"🟡 {t('zcyc_color_yellow')}", 'value': '#2a260e'},
+        {'label': f"⬜ {t('zcyc_color_gray')}", 'value': '#16181a'},
+    ]
+
+
 def _line_style_options():
     return [
         {'label': t('zcyc_line_style_solid'), 'value': 'solid'},
@@ -131,6 +148,12 @@ def create_layout():
                                 id='line-style',
                                 options=_line_style_options(),
                                 value='solid', clearable=False
+                            ),
+                            html.Label(t('zcyc_bg_color_label'), className="mt-3"),
+                            dcc.Dropdown(
+                                id='chart-bg-color',
+                                options=_bg_color_options(),
+                                value='auto', clearable=False
                             ),
                             # Чекбоксы для управления отображением
                             dbc.Row([

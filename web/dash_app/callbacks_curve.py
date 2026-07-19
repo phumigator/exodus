@@ -92,11 +92,12 @@ def register_callbacks(app):
          Input('show-title', 'value'),
          Input('show-grid', 'value'),
          Input('label-mode', 'value'),
-         Input('x-range-slider', 'value')]
+         Input('x-range-slider', 'value'),
+         Input('chart-bg-color', 'value')]
     )
     def update_plots(curve_data, y_range, line_color, line_width, line_style,
                      raw_data, custom_points, show_labels, show_legend, show_title,
-                     show_grid, label_mode, x_range):
+                     show_grid, label_mode, x_range, chart_bg_color):
         # Преобразование чекбоксов
         show_labels = bool(show_labels and show_labels[0]) if isinstance(show_labels, list) else bool(show_labels)
         show_legend = bool(show_legend and show_legend[0]) if isinstance(show_legend, list) else bool(show_legend)
@@ -104,6 +105,9 @@ def register_callbacks(app):
         show_grid = bool(show_grid and show_grid[0]) if isinstance(show_grid, list) else bool(show_grid)
 
         colors = pip_colors()
+        # Ручной выбор фона (dropdown 'chart-bg-color') переопределяет фон темы,
+        # пока не выбран пункт "По умолчанию" (value='auto').
+        bg_color = chart_bg_color if chart_bg_color and chart_bg_color != 'auto' else colors['panel']
 
         if not curve_data:
             empty_fig = go.Figure()
@@ -111,8 +115,8 @@ def register_callbacks(app):
                 title=t('zcyc_no_curve_data') if show_title else "",
                 xaxis_title=t('zcyc_x_axis_title'),
                 yaxis_title=t('zcyc_y_axis_title'),
-                plot_bgcolor=colors['panel'],
-                paper_bgcolor=colors['panel'],
+                plot_bgcolor=bg_color,
+                paper_bgcolor=bg_color,
                 font=dict(color=colors['text']),
                 height=500
             )
@@ -124,8 +128,8 @@ def register_callbacks(app):
                 empty_fig = go.Figure()
                 empty_fig.update_layout(
                     title=t('zcyc_curve_data_empty') if show_title else "",
-                    plot_bgcolor=colors['panel'],
-                    paper_bgcolor=colors['panel'],
+                    plot_bgcolor=bg_color,
+                    paper_bgcolor=bg_color,
                     font=dict(color=colors['text']),
                     height=500,
                 )
@@ -264,8 +268,8 @@ def register_callbacks(app):
                 showlegend=show_legend,
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
                             font=dict(color=colors['text'])),
-                plot_bgcolor=colors['panel'],
-                paper_bgcolor=colors['panel'],
+                plot_bgcolor=bg_color,
+                paper_bgcolor=bg_color,
                 font=dict(color=colors['text']),
                 height=500
             )
@@ -279,8 +283,8 @@ def register_callbacks(app):
             empty_fig = go.Figure()
             empty_fig.update_layout(
                 title=f"{t('zcyc_error_prefix')}{str(e)}" if show_title else "",
-                plot_bgcolor=colors['panel'],
-                paper_bgcolor=colors['panel'],
+                plot_bgcolor=bg_color,
+                paper_bgcolor=bg_color,
                 font=dict(color=colors['text']),
             )
             return empty_fig
