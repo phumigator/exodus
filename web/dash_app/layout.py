@@ -287,15 +287,16 @@ def create_layout():
                                                className="w-100 mt-2")
                                 ], width=6),
                                 dbc.Col([
+                                    # dcc.Upload как невидимая обёртка вокруг обычной dbc.Button —
+                                    # так кнопка получает те же CSS-классы/стиль, что и "Экспорт
+                                    # точек" рядом (иначе стандартный вид Upload — пунктирная рамка —
+                                    # выглядел мельче и по-другому, см. запрос пользователя).
                                     dcc.Upload(
                                         id='import-points-upload',
-                                        children=html.Div([t('zcyc_import_points_label')]),
-                                        style={
-                                            'width': '100%', 'height': '38px', 'lineHeight': '38px',
-                                            'borderWidth': '1px', 'borderStyle': 'dashed', 'borderRadius': '5px',
-                                            'borderColor': colors['dim'], 'color': colors['text'],
-                                            'textAlign': 'center', 'marginTop': '8px', 'cursor': 'pointer'
-                                        },
+                                        children=dbc.Button(t('zcyc_import_points_label'),
+                                                             color="secondary",
+                                                             className="w-100"),
+                                        style={'width': '100%', 'marginTop': '8px'},
                                         multiple=False
                                     )
                                 ], width=6)
