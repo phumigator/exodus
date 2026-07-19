@@ -7,6 +7,7 @@ from dash import dcc, html, Input, Output, State, callback, no_update, callback_
 import dash_bootstrap_components as dbc
 
 from .exchange import fetch_zcyc_data, calculate_zcyc_curve, default_zcyc_data
+from .i18n import t, pip_colors
 
 CURVE_POINTS = 1500
 
@@ -26,19 +27,14 @@ def register_callbacks(app):
         ctx = callback_context
         if not ctx.triggered:
             # Используем default_zcyc_data, если нет триггера
-            date_display = f"Дата: {default_zcyc_data['tradedate'].iloc[0]}"
-            time_display = f"Время: {default_zcyc_data['tradetime'].iloc[0]}"
+            date_display = f"{t('zcyc_date_prefix')}{default_zcyc_data['tradedate'].iloc[0]}"
+            time_display = f"{t('zcyc_time_prefix')}{default_zcyc_data['tradetime'].iloc[0]}"
             params_data = [
-                {"parameter": "B1 (beta0)", "value": f"{float(default_zcyc_data['B1'].iloc[0]):.6f}",
-                 "description": "Уровень кривой"},
-                {"parameter": "B2 (beta1)", "value": f"{float(default_zcyc_data['B2'].iloc[0]):.6f}",
-                 "description": "Наклон кривой"},
-                {"parameter": "B3 (beta2)", "value": f"{float(default_zcyc_data['B3'].iloc[0]):.6f}",
-                 "description": "Кривизна"},
-                {"parameter": "T1 (tau)", "value": f"{float(default_zcyc_data['T1'].iloc[0]):.6f}",
-                 "description": "Масштабирующий параметр"},
-                {"parameter": "Дата", "value": default_zcyc_data['tradedate'].iloc[0],
-                 "description": "Дата расчета"}
+                {"parameter": "B1 (beta0)", "value": f"{float(default_zcyc_data['B1'].iloc[0]):.6f}"},
+                {"parameter": "B2 (beta1)", "value": f"{float(default_zcyc_data['B2'].iloc[0]):.6f}"},
+                {"parameter": "B3 (beta2)", "value": f"{float(default_zcyc_data['B3'].iloc[0]):.6f}"},
+                {"parameter": "T1 (tau)", "value": f"{float(default_zcyc_data['T1'].iloc[0]):.6f}"},
+                {"parameter": t('zcyc_param_date'), "value": default_zcyc_data['tradedate'].iloc[0]}
             ]
             return default_zcyc_data.to_dict('records'), params_data, date_display, time_display
 
@@ -47,20 +43,15 @@ def register_callbacks(app):
             # Если ошибка, возвращаем no_update для всех выходов
             return no_update, no_update, no_update, no_update
 
-        date_display = f"Дата: {df_data_new['tradedate'].iloc[0]}"
-        time_display = f"Время: {df_data_new['tradetime'].iloc[0]}"
+        date_display = f"{t('zcyc_date_prefix')}{df_data_new['tradedate'].iloc[0]}"
+        time_display = f"{t('zcyc_time_prefix')}{df_data_new['tradetime'].iloc[0]}"
 
         params_data = [
-            {"parameter": "B1 (beta0)", "value": f"{float(df_data_new['B1'].iloc[0]):.6f}",
-             "description": "Уровень кривой"},
-            {"parameter": "B2 (beta1)", "value": f"{float(df_data_new['B2'].iloc[0]):.6f}",
-             "description": "Наклон кривой"},
-            {"parameter": "B3 (beta2)", "value": f"{float(df_data_new['B3'].iloc[0]):.6f}",
-             "description": "Кривизна"},
-            {"parameter": "T1 (tau)", "value": f"{float(df_data_new['T1'].iloc[0]):.6f}",
-             "description": "Масштабирующий параметр"},
-            {"parameter": "Дата", "value": df_data_new['tradedate'].iloc[0],
-             "description": "Дата расчета"}
+            {"parameter": "B1 (beta0)", "value": f"{float(df_data_new['B1'].iloc[0]):.6f}"},
+            {"parameter": "B2 (beta1)", "value": f"{float(df_data_new['B2'].iloc[0]):.6f}"},
+            {"parameter": "B3 (beta2)", "value": f"{float(df_data_new['B3'].iloc[0]):.6f}"},
+            {"parameter": "T1 (tau)", "value": f"{float(df_data_new['T1'].iloc[0]):.6f}"},
+            {"parameter": t('zcyc_param_date'), "value": df_data_new['tradedate'].iloc[0]}
         ]
 
         return df_data_new.to_dict('records'), params_data, date_display, time_display
@@ -112,13 +103,17 @@ def register_callbacks(app):
         show_title = bool(show_title and show_title[0]) if isinstance(show_title, list) else bool(show_title)
         show_grid = bool(show_grid and show_grid[0]) if isinstance(show_grid, list) else bool(show_grid)
 
+        colors = pip_colors()
+
         if not curve_data:
             empty_fig = go.Figure()
             empty_fig.update_layout(
-                title="Нет данных кривой" if show_title else "",
-                xaxis_title="Срок до погашения, лет",
-                yaxis_title="Доходность, % годовых",
-                plot_bgcolor='white',
+                title=t('zcyc_no_curve_data') if show_title else "",
+                xaxis_title=t('zcyc_x_axis_title'),
+                yaxis_title=t('zcyc_y_axis_title'),
+                plot_bgcolor=colors['panel'],
+                paper_bgcolor=colors['panel'],
+                font=dict(color=colors['text']),
                 height=500
             )
             return empty_fig
@@ -127,7 +122,13 @@ def register_callbacks(app):
             results_df = pd.DataFrame(curve_data)
             if results_df.empty:
                 empty_fig = go.Figure()
-                empty_fig.update_layout(title="Данные кривой пусты" if show_title else "", height=500)
+                empty_fig.update_layout(
+                    title=t('zcyc_curve_data_empty') if show_title else "",
+                    plot_bgcolor=colors['panel'],
+                    paper_bgcolor=colors['panel'],
+                    font=dict(color=colors['text']),
+                    height=500,
+                )
                 return empty_fig
 
             fig_main = go.Figure()
@@ -135,9 +136,10 @@ def register_callbacks(app):
                 x=results_df['Срок (лет)'],
                 y=results_df['Доходность (%)'],
                 mode='lines',
-                name='Кривая ZCYC',
+                name=t('zcyc_curve_trace_name'),
                 line=dict(color=line_color, width=line_width, dash=line_style),
-                hovertemplate='Срок: %{x:.2f} лет<br>Доходность: %{y:.4f}%<extra></extra>'
+                hovertemplate=(f"{t('zcyc_term_word')}: %{{x:.2f}} {t('zcyc_years_word')}<br>"
+                                f"{t('zcyc_yield_word')}: %{{y:.4f}}%<extra></extra>")
             ))
 
             if custom_points:
@@ -164,8 +166,8 @@ def register_callbacks(app):
                         marker=dict(size=sizes, color=color, symbol='circle', line=dict(width=1, color='white')),
                         hovertemplate=(
                             "<b>%{text}</b><br>"
-                            "Срок: %{x:.2f} лет<br>"
-                            "Доходность: %{y:.2f}%<br>"
+                            f"{t('zcyc_term_word')}: %{{x:.2f}} {t('zcyc_years_word')}<br>"
+                            f"{t('zcyc_yield_word')}: %{{y:.2f}}%<br>"
                             "<extra></extra>"
                         ),
                         text=names  # для ховера
@@ -224,7 +226,7 @@ def register_callbacks(app):
 
             title_text = ''
             if show_title:
-                title_text = 'Кривая бескупонной доходности (ZCYC)'
+                title_text = t('zcyc_chart_title')
                 if raw_data:
                     try:
                         df_raw = pd.DataFrame(raw_data)
@@ -235,22 +237,22 @@ def register_callbacks(app):
                     except:
                         pass
                 if custom_points:
-                    title_text += f' | Точек: {len(custom_points)}'
+                    title_text += t('zcyc_points_count_suffix').format(count=len(custom_points))
 
             # Формируем настройки осей с учётом сетки
             xaxis_layout = dict(
-                title='Срок до погашения, лет',
+                title=t('zcyc_x_axis_title'),
                 showgrid=show_grid,
                 gridwidth=1,
-                gridcolor='lightgray',
+                gridcolor=colors['dim'],
                 griddash='solid'
             )
             yaxis_layout = dict(
-                title='Доходность, % годовых',
+                title=t('zcyc_y_axis_title'),
                 range=y_range,
                 showgrid=show_grid,
                 gridwidth=1,
-                gridcolor='lightgray',
+                gridcolor=colors['dim'],
                 griddash='solid'
             )
 
@@ -260,8 +262,11 @@ def register_callbacks(app):
                 yaxis=yaxis_layout,
                 hovermode='closest',
                 showlegend=show_legend,
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                plot_bgcolor='white',
+                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1,
+                            font=dict(color=colors['text'])),
+                plot_bgcolor=colors['panel'],
+                paper_bgcolor=colors['panel'],
+                font=dict(color=colors['text']),
                 height=500
             )
 
@@ -272,7 +277,12 @@ def register_callbacks(app):
             import traceback
             traceback.print_exc()
             empty_fig = go.Figure()
-            empty_fig.update_layout(title=f"Ошибка: {str(e)}" if show_title else "")
+            empty_fig.update_layout(
+                title=f"{t('zcyc_error_prefix')}{str(e)}" if show_title else "",
+                plot_bgcolor=colors['panel'],
+                paper_bgcolor=colors['panel'],
+                font=dict(color=colors['text']),
+            )
             return empty_fig
 
     @app.callback(

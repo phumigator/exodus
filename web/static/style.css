@@ -564,3 +564,154 @@ body.pipboy-page .timeline-item .period {
 body.pipboy-page .timeline-item strong {
     color: var(--pip-green);
 }
+
+/* ---------- Pip-Boy reskin for the ZCYC Dash app (dbc/dcc/dash_table) ---------- */
+/* dash_table header/cell backgrounds are set inline from Python (i18n.pip_colors,
+   see dash_app/layout.py & callbacks_curve.py) since CSS can't win over inline
+   style attributes; everything below covers what CSS *can* reach. */
+
+body.zcyc-page h1 {
+    color: var(--pip-green);
+    text-shadow: var(--pip-glow);
+}
+
+/* .card/.card-body already picked up by the generic body.pipboy-page .card rule
+   above; card-header and Bootstrap's forced text-color utilities still need
+   neutralizing (Bootstrap ships bg-primary/bg-info/... and text-white/text-dark
+   as plain utility classes, so ours — loaded after bootstrap.css — wins). */
+body.zcyc-page .card-header[class*="bg-"] {
+    background: rgba(var(--pip-green-rgb), .12) !important;
+    border-bottom: 1px solid var(--pip-green-dim);
+}
+
+body.zcyc-page .text-white,
+body.zcyc-page .text-dark {
+    color: var(--pip-green) !important;
+    text-shadow: var(--pip-glow);
+}
+
+body.zcyc-page .text-muted {
+    color: var(--pip-text) !important;
+    opacity: .8;
+}
+
+body.zcyc-page label,
+body.zcyc-page .form-check-label {
+    color: var(--pip-text);
+}
+
+/* dcc.Input renders <input class="dash-input-element"> inside a
+   <div class="dash-input-container"> that carries the visible background —
+   styling the input alone leaves the wrapper's own (light) background showing.
+   Dash injects this component's CSS via a runtime <style> tag placed after
+   style.css, so !important is needed to win the cascade (see slider note above). */
+body.zcyc-page .dash-input-container {
+    background: var(--pip-input-bg) !important;
+    border: 1px solid var(--pip-green-dim) !important;
+}
+
+body.zcyc-page .dash-input-element {
+    color: var(--pip-green) !important;
+}
+
+body.zcyc-page .dash-input-stepper {
+    background: var(--pip-panel) !important;
+    color: var(--pip-green) !important;
+}
+
+body.zcyc-page input[type="checkbox"],
+body.zcyc-page input[type="radio"] {
+    accent-color: var(--pip-green);
+}
+
+/* dcc.Dropdown (Dash's own "dash-dropdown-*" markup, not react-select) */
+body.zcyc-page .dash-dropdown-grid-container.dash-dropdown-trigger {
+    background: var(--pip-input-bg);
+    border: 1px solid var(--pip-green-dim);
+    border-radius: 4px;
+    color: var(--pip-green);
+}
+
+body.zcyc-page .dash-dropdown-value,
+body.zcyc-page .dash-dropdown-value-item {
+    color: var(--pip-green);
+}
+
+body.zcyc-page .dash-dropdown-placeholder {
+    color: var(--pip-green-dim);
+}
+
+body.zcyc-page .dash-dropdown-options {
+    background: var(--pip-panel);
+    border: 1px solid var(--pip-green-dim);
+}
+
+body.zcyc-page .dash-dropdown-option {
+    color: var(--pip-text);
+}
+
+body.zcyc-page .dash-dropdown-option:hover,
+body.zcyc-page .dash-dropdown-option[aria-selected="true"] {
+    background: rgba(var(--pip-green-rgb), .15);
+    color: var(--pip-green);
+}
+
+/* dcc.Slider / dcc.RangeSlider — Dash injects this component's own CSS chunk
+   at runtime (after style.css already parsed), so equal-specificity rules
+   lose the cascade; !important is needed to reliably win here. */
+body.zcyc-page .dash-slider-track {
+    background: var(--pip-green-dim) !important;
+}
+
+body.zcyc-page .dash-slider-range {
+    background: var(--pip-green) !important;
+}
+
+body.zcyc-page .dash-slider-dot {
+    background: var(--pip-panel) !important;
+    border-color: var(--pip-green-dim) !important;
+}
+
+body.zcyc-page .dash-slider-thumb {
+    background: var(--pip-green) !important;
+    border: 2px solid var(--pip-green) !important;
+    box-shadow: var(--pip-glow);
+}
+
+body.zcyc-page .dash-slider-mark {
+    color: var(--pip-text);
+}
+
+body.zcyc-page .dash-slider-tooltip {
+    background: var(--pip-panel) !important;
+    color: var(--pip-green) !important;
+    border: 1px solid var(--pip-green-dim);
+}
+
+/* Editable min/max number boxes flanking dcc.RangeSlider */
+body.zcyc-page .dash-range-slider-input {
+    background: var(--pip-input-bg) !important;
+    color: var(--pip-green) !important;
+    border: 1px solid var(--pip-green-dim) !important;
+    border-radius: 4px;
+}
+
+/* dash_table: outer container, filter row, pagination (cell/header colors are inline) */
+body.zcyc-page .dash-table-container {
+    background: var(--pip-panel);
+}
+
+body.zcyc-page .dash-filter input {
+    background: var(--pip-input-bg);
+    color: var(--pip-green);
+    border: 1px solid var(--pip-green-dim);
+}
+
+body.zcyc-page .previous-page,
+body.zcyc-page .next-page,
+body.zcyc-page .first-page,
+body.zcyc-page .last-page,
+body.zcyc-page .page-number,
+body.zcyc-page .current-page {
+    color: var(--pip-green);
+}

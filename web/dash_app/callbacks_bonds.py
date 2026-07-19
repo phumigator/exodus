@@ -8,6 +8,7 @@ import pandas as pd
 from dash import dcc, html, dash_table, Input, Output, State, callback, no_update, callback_context
 
 from .exchange import get_bonds_by_inn, get_cbr_rates, enrich_bonds
+from .i18n import t
 
 
 def register_callbacks(app):
@@ -22,25 +23,25 @@ def register_callbacks(app):
     )
     def load_bonds(n_clicks, inn):
         if not inn:
-            return no_update, "Введите ИНН."
+            return no_update, t('zcyc_enter_inn')
         try:
             bonds_df = get_bonds_by_inn(inn.strip())
             if bonds_df.empty:
-                return None, f"Не найдено облигаций для ИНН {inn}."
+                return None, t('zcyc_no_bonds_found').format(inn=inn)
 
             rates = get_cbr_rates()
             enriched_df = enrich_bonds(bonds_df, rates)
 
             if enriched_df.empty:
-                return None, f"Облигации найдены, но не удалось загрузить детали."
+                return None, t('zcyc_bonds_found_no_details')
 
-            return enriched_df.to_dict('records'), f"Загружено {len(enriched_df)} облигаций."
+            return enriched_df.to_dict('records'), t('zcyc_bonds_loaded').format(count=len(enriched_df))
 
         except Exception as e:
             print(f"DEBUG [load_bonds]: exception: {e}")
             import traceback
             traceback.print_exc()
-            return None, f"Ошибка: {str(e)}"
+            return None, f"{t('zcyc_error_prefix')}{str(e)}"
 
     @app.callback(
         [Output('bonds-table', 'columns'),
@@ -212,7 +213,8 @@ def _build_points_list_from_store(points):
     for p in points:
         items.append(html.Div([
             html.Span("●", style={'color': p['color'], 'fontSize': '20px', 'marginRight': '5px'}),
-            html.Span(f"{p['name']}: {p['term']:.2f} лет, {p['yield']:.2f}%", style={'font-weight': 'bold'}),
+            html.Span(f"{p['name']}: {p['term']:.2f} {t('zcyc_years_word')}, {p['yield']:.2f}%",
+                      style={'font-weight': 'bold'}),
             html.Button("×", id={'type': 'delete-point-btn', 'index': p['id']},
                         style={'float': 'right', 'background': 'red', 'color': 'white', 'border': 'none',
                                'borderRadius': '50%', 'width': '20px', 'height': '20px', 'cursor': 'pointer'})

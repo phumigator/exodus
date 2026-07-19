@@ -3,6 +3,8 @@
 """
 from dash import html, Input, Output, callback, callback_context
 
+from .i18n import t
+
 
 def register_callbacks(app):
     """Регистрирует общие колбэки."""
@@ -19,11 +21,11 @@ def register_callbacks(app):
             return ""
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
         if button_id == 'download-data-btn':
-            return html.Span("✅ Данные кривой скачаны!", className="text-success")
+            return html.Span(t('zcyc_status_curve_downloaded'), className="text-success")
         elif button_id == 'download-points-btn':
-            return html.Span("✅ Точки скачаны в CSV!", className="text-success")
+            return html.Span(t('zcyc_status_points_csv_downloaded'), className="text-success")
         elif button_id == 'export-points-btn':
-            return html.Span("✅ Точки экспортированы в JSON!", className="text-success")
+            return html.Span(t('zcyc_status_points_json_exported'), className="text-success")
         return ""
 
     @app.callback(

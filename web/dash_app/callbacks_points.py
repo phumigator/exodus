@@ -9,13 +9,17 @@ from datetime import datetime
 import pandas as pd
 from dash import dcc, html, dash_table, Input, Output, State, callback, no_update, ALL, callback_context
 
-# Константа с колонками таблицы точек
-POINTS_TABLE_COLUMNS = [
-    {"name": "ID", "id": "ID", "editable": False},
-    {"name": "Название", "id": "Название", "editable": True},
-    {"name": "Срок (лет)", "id": "Срок (лет)", "editable": False},
-    {"name": "Доходность (%)", "id": "Доходность (%)", "editable": True}
-]
+from .i18n import t
+
+
+def _points_table_columns():
+    """Колонки таблицы точек, лейблы зависят от языка запроса (id — фиксированные ключи данных)."""
+    return [
+        {"name": t('zcyc_col_id'), "id": "ID", "editable": False},
+        {"name": t('zcyc_col_name'), "id": "Название", "editable": True},
+        {"name": t('zcyc_col_term'), "id": "Срок (лет)", "editable": False},
+        {"name": t('zcyc_col_yield'), "id": "Доходность (%)", "editable": True}
+    ]
 
 
 def register_callbacks(app):
@@ -52,7 +56,7 @@ def register_callbacks(app):
         button_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
         if button_id == 'clear-points-btn':
-            return [], html.Div("Все точки очищены"), [], POINTS_TABLE_COLUMNS, '', '', '', ''
+            return [], html.Div(t('zcyc_points_cleared')), [], _points_table_columns(), '', '', '', ''
 
         if button_id == 'import-points-upload' and upload_contents:
             try:
@@ -67,8 +71,8 @@ def register_callbacks(app):
                     table_data = [{'ID': p['id'], 'Название': p['name'], 'Срок (лет)': f"{p['term']:.2f}",
                                    'Доходность (%)': f"{p['yield']:.2f}"} for p in points_data]
                     points_list = _build_points_list(points_data)
-                    return points_data, points_list, table_data, POINTS_TABLE_COLUMNS, '', '', '', \
-                           html.Div(f"Импортировано {len(points_data)} точек", style={'color': 'green'})
+                    return points_data, points_list, table_data, _points_table_columns(), '', '', '', \
+                           html.Div(t('zcyc_points_imported').format(count=len(points_data)), style={'color': 'green'})
                 elif filename and filename.endswith('.csv'):
                     df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
                     points_data = []
@@ -86,24 +90,24 @@ def register_callbacks(app):
                     table_data = [{'ID': p['id'], 'Название': p['name'], 'Срок (лет)': f"{p['term']:.2f}",
                                    'Доходность (%)': f"{p['yield']:.2f}"} for p in points_data]
                     points_list = _build_points_list(points_data)
-                    return points_data, points_list, table_data, POINTS_TABLE_COLUMNS, '', '', '', \
-                           html.Div(f"Импортировано {len(points_data)} точек", style={'color': 'green'})
+                    return points_data, points_list, table_data, _points_table_columns(), '', '', '', \
+                           html.Div(t('zcyc_points_imported').format(count=len(points_data)), style={'color': 'green'})
                 else:
                     return no_update, no_update, no_update, no_update, '', '', '', \
-                           html.Div("Поддерживаются только JSON и CSV", style={'color': 'red'})
+                           html.Div(t('zcyc_import_unsupported_format'), style={'color': 'red'})
             except Exception as e:
                 return no_update, no_update, no_update, no_update, '', '', '', \
-                       html.Div(f"Ошибка импорта: {str(e)}", style={'color': 'red'})
+                       html.Div(f"{t('zcyc_import_error_prefix')}{str(e)}", style={'color': 'red'})
 
         if button_id == 'add-point-btn':
             if not name or not term or not yield_val:
-                return no_update, html.Div("Заполните все поля!", style={'color': 'red'}), \
+                return no_update, html.Div(t('zcyc_fill_all_fields'), style={'color': 'red'}), \
                        no_update, no_update, name, term, yield_val, ''
             try:
                 term_val = float(term)
                 yield_val_float = float(yield_val)
             except ValueError:
-                return no_update, html.Div("Срок и доходность должны быть числами", style={'color': 'red'}), \
+                return no_update, html.Div(t('zcyc_term_yield_must_be_numbers'), style={'color': 'red'}), \
                        no_update, no_update, name, term, yield_val, ''
 
             new_id = len(current_points)
@@ -123,7 +127,7 @@ def register_callbacks(app):
             table_data = [{'ID': p['id'], 'Название': p['name'], 'Срок (лет)': f"{p['term']:.2f}",
                            'Доходность (%)': f"{p['yield']:.2f}"} for p in updated_points]
 
-            return updated_points, points_list, table_data, POINTS_TABLE_COLUMNS, '', '', '', ''
+            return updated_points, points_list, table_data, _points_table_columns(), '', '', '', ''
 
         return no_update, no_update, no_update, no_update, '', '', '', ''
 
@@ -255,12 +259,12 @@ def register_callbacks(app):
                 points_list = []
                 for p in data:
                     points_list.append({
-                        'Название': p.get('name', ''),
-                        'Эмитент': p.get('issuer', ''),
-                        'Срок (лет)': p.get('term', 0),
-                        'Доходность (%)': p.get('yield', 0),
-                        'Цвет': p.get('color', '#007bff'),
-                        'Размер': p.get('size', 10)
+                        t('zcyc_col_name'): p.get('name', ''),
+                        t('zcyc_col_issuer'): p.get('issuer', ''),
+                        t('zcyc_col_term'): p.get('term', 0),
+                        t('zcyc_col_yield'): p.get('yield', 0),
+                        t('zcyc_col_color'): p.get('color', '#007bff'),
+                        t('zcyc_col_size'): p.get('size', 10)
                     })
                 df = pd.DataFrame(points_list)
                 return dcc.send_data_frame(df.to_csv, "custom_points.csv", index=False)
@@ -289,7 +293,8 @@ def _build_points_list(points):
     for p in points:
         items.append(html.Div([
             html.Span("●", style={'color': p['color'], 'fontSize': '20px', 'marginRight': '5px'}),
-            html.Span(f"{p['name']}: {p['term']:.2f} лет, {p['yield']:.2f}%", style={'font-weight': 'bold'}),
+            html.Span(f"{p['name']}: {p['term']:.2f} {t('zcyc_years_word')}, {p['yield']:.2f}%",
+                      style={'font-weight': 'bold'}),
             html.Button("×", id={'type': 'delete-point-btn', 'index': p['id']},
                         style={'float': 'right', 'background': 'red', 'color': 'white', 'border': 'none',
                                'borderRadius': '50%', 'width': '20px', 'height': '20px', 'cursor': 'pointer'})
