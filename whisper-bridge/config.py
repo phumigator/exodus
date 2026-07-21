@@ -1,7 +1,6 @@
 """
 Конфигурация моста: приватный Whisper-контейнер во внутренней docker-сети,
-OpenRouter для коррекции распознанного текста, общий секрет для авторизации
-запросов от VPS.
+общий секрет для авторизации запросов от VPS.
 """
 from pydantic_settings import BaseSettings
 
@@ -14,11 +13,6 @@ class Settings(BaseSettings):
     # Уже работающий с VPS контейнер whisper-service (проект docker-stack),
     # доступен по имени в общей сети ai-network, наружу не опубликован
     whisper_internal_url: str = "http://whisper-service:9000"
-
-    # OpenRouter — коррекция грамматики/смысла распознанного текста
-    openrouter_api_key: str = ""
-    openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    openrouter_model: str = "nvidia/nemotron-3-ultra-550b-a55b:free"
 
     class Config:
         env_file = ".env"

@@ -1,39 +1,23 @@
 """
 Whisper-мост: принимает аудио от VPS (Exodus API), проверяет общий секрет,
-пересылает файл во внутренний Whisper-контейнер, прогоняет распознанный
-текст через OpenRouter для исправления грамматики/смысла (не суммаризация)
-и возвращает результат в том же формате, что отдаёт сам Whisper.
+пересылает файл во внутренний Whisper-контейнер и возвращает результат в том
+же формате, что отдаёт сам Whisper.
+
+Коррекция текста через OpenRouter сюда не входит: запросы к OpenRouter с этой
+машины блокируются провайдером ("Access denied by security policy"), поэтому
+коррекция теперь выполняется отдельным шагом на стороне api (задеплоен на
+VPS, с другого IP) — см. api/routers/transcription.py.
 """
 import asyncio
 import os
 import tempfile
 
 import httpx
-from fastapi import FastAPI, File, Form, Header, HTTPException, Query, UploadFile
+from fastapi import FastAPI, File, Header, HTTPException, Query, UploadFile
 
 from config import settings
 
 app = FastAPI(title="Exodus Whisper Bridge")
-
-CORRECTION_PROMPT = (
-    "Ты корректор транскрипций. На вход подаётся сырой текст, распознанный "
-    "речевым движком (Whisper) — в нём встречаются ошибки распознавания: "
-    "неверно услышанные слова, пропущенные/лишние знаки препинания, "
-    "неправильная сегментация предложений, слитые или разорванные слова. "
-    "Твоя задача — только исправить эти ошибки распознавания речи, "
-    "восстановив наиболее вероятный исходный текст.\n\n"
-    "Строго соблюдай:\n"
-    "1. Не думай вслух, не показывай рассуждения — сразу выдай финальный результат.\n"
-    "2. Не добавляй ничего от себя: ни новых фактов, ни пояснений, ни оценок, "
-    "ни предупреждений о недостатке контекста.\n"
-    "3. Не суммаризируй и не сокращай — длина и структура текста должны "
-    "остаться теми же, меняются только ошибочные слова и пунктуация.\n"
-    "4. Сохраняй исходный язык, стиль и смысл текста как есть, даже если он "
-    "разговорный, незаконченный или бессвязный.\n"
-    "5. Если текст пустой или уже корректен — верни его без изменений.\n"
-    "6. Ответ должен содержать только исправленный текст, без кавычек, "
-    "префиксов вроде \"Исправленный текст:\" и без markdown-разметки."
-)
 
 
 async def _to_wav(data: bytes, filename: str | None) -> bytes:
@@ -75,35 +59,6 @@ def _check_token(x_internal_token: str | None) -> None:
         raise HTTPException(status_code=401, detail="Неверный или отсутствующий X-Internal-Token")
 
 
-async def _correct_text(raw_text: str, prompt: str | None = None, model: str | None = None) -> str:
-    if not raw_text.strip() or not settings.openrouter_api_key:
-        return raw_text
-
-    payload = {
-        "model": model or settings.openrouter_model,
-        "messages": [
-            {"role": "system", "content": prompt or CORRECTION_PROMPT},
-            {"role": "user", "content": raw_text},
-        ],
-    }
-    headers = {"Authorization": f"Bearer {settings.openrouter_api_key}"}
-
-    async with httpx.AsyncClient(timeout=120, trust_env=False) as client:
-        try:
-            response = await client.post(
-                f"{settings.openrouter_base_url}/chat/completions",
-                json=payload,
-                headers=headers,
-            )
-            response.raise_for_status()
-            data = response.json()
-            return data["choices"][0]["message"]["content"]
-        except (httpx.HTTPError, KeyError, IndexError, TypeError):
-            # Коррекция необязательна: при сбое OpenRouter отдаём сырой текст,
-            # чтобы транскрибация не падала целиком из-за внешнего сервиса.
-            return raw_text
-
-
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -113,8 +68,6 @@ async def health():
 async def asr(
     audio_file: UploadFile = File(...),
     output: str = Query("json"),
-    correction_prompt: str | None = Form(None),
-    correction_model: str | None = Form(None),
     x_internal_token: str | None = Header(None),
 ):
     _check_token(x_internal_token)
@@ -142,6 +95,4 @@ async def asr(
         except httpx.HTTPError as exc:
             raise HTTPException(status_code=502, detail=f"Внутренний Whisper недоступен: {exc}")
 
-    raw = response.json()
-    corrected_text = await _correct_text(raw.get("text", ""), correction_prompt, correction_model)
-    return {"text": corrected_text}
+    return response.json()

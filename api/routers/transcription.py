@@ -1,13 +1,15 @@
 """
-Транскрибация и суммаризация загруженного аудио/видео.
+Транскрибация, коррекция и суммаризация загруженного аудио/видео.
 
-Аудио передаётся в Whisper (распознавание речи, удалённый сервер),
-полученный текст — в OpenRouter (суммаризация через внешний LLM API).
+Аудио передаётся в Whisper (распознавание речи, whisper-bridge на локальной
+машине разработчика), коррекция и суммаризация текста — в OpenRouter (внешний
+LLM API). Коррекция намеренно не делается в whisper-bridge: прямые запросы к
+OpenRouter с той машины блокируются провайдером, а отсюда (VPS) — нет.
 """
 import asyncio
 
 import httpx
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
 
 from config import settings
@@ -16,9 +18,34 @@ router = APIRouter(prefix="/transcription", tags=["transcription"])
 
 
 DEFAULT_SUMMARY_PROMPT = "Ты помощник, который делает краткую выжимку текста на русском языке."
+DEFAULT_CORRECTION_PROMPT = (
+    "Ты корректор транскрипций. На вход подаётся сырой текст, распознанный "
+    "речевым движком (Whisper) — в нём встречаются ошибки распознавания: "
+    "неверно услышанные слова, пропущенные/лишние знаки препинания, "
+    "неправильная сегментация предложений, слитые или разорванные слова. "
+    "Твоя задача — только исправить эти ошибки распознавания речи, "
+    "восстановив наиболее вероятный исходный текст.\n\n"
+    "Строго соблюдай:\n"
+    "1. Не думай вслух, не показывай рассуждения — сразу выдай финальный результат.\n"
+    "2. Не добавляй ничего от себя: ни новых фактов, ни пояснений, ни оценок, "
+    "ни предупреждений о недостатке контекста.\n"
+    "3. Не суммаризируй и не сокращай — длина и структура текста должны "
+    "остаться теми же, меняются только ошибочные слова и пунктуация.\n"
+    "4. Сохраняй исходный язык, стиль и смысл текста как есть, даже если он "
+    "разговорный, незаконченный или бессвязный.\n"
+    "5. Если текст пустой или уже корректен — верни его без изменений.\n"
+    "6. Ответ должен содержать только исправленный текст, без кавычек, "
+    "префиксов вроде \"Исправленный текст:\" и без markdown-разметки."
+)
 
 
 class SummarizeRequest(BaseModel):
+    text: str
+    model: str | None = None
+    prompt: str | None = None
+
+
+class CorrectRequest(BaseModel):
     text: str
     model: str | None = None
     prompt: str | None = None
@@ -95,27 +122,16 @@ async def _call_openrouter(messages: list[dict], model: str | None) -> str:
 
 
 @router.post("/transcribe")
-async def transcribe(
-    file: UploadFile = File(...),
-    correction_prompt: str | None = Form(None),
-    correction_model: str | None = Form(None),
-):
-    """Отправляет файл в Whisper API и возвращает распознанный текст."""
+async def transcribe(file: UploadFile = File(...)):
+    """Отправляет файл в Whisper API и возвращает распознанный текст (без коррекции)."""
     async with httpx.AsyncClient(timeout=1800, trust_env=False) as client:
         files = {"audio_file": (file.filename, await file.read(), file.content_type)}
-        data = {}
-        if correction_prompt:
-            data["correction_prompt"] = correction_prompt
-        if correction_model:
-            data["correction_model"] = correction_model
-        data = data or None
         headers = {"X-Internal-Token": settings.whisper_shared_secret}
         try:
             response = await client.post(
                 f"{settings.whisper_api_base_url}/asr",
                 params={"output": "json"},
                 files=files,
-                data=data,
                 headers=headers,
             )
             response.raise_for_status()
@@ -132,6 +148,17 @@ async def transcribe(
             raise HTTPException(status_code=502, detail=f"Whisper API error: {exc}")
 
     return response.json()
+
+
+@router.post("/correct")
+async def correct(request: CorrectRequest):
+    """Исправляет ошибки распознавания речи в тексте через OpenRouter."""
+    messages = [
+        {"role": "system", "content": request.prompt or DEFAULT_CORRECTION_PROMPT},
+        {"role": "user", "content": request.text},
+    ]
+    corrected = await _call_openrouter(messages, request.model)
+    return {"corrected_text": corrected}
 
 
 @router.post("/summarize")

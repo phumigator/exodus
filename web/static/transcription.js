@@ -1,5 +1,6 @@
 const form = document.getElementById("upload-form");
 const transcribeBtn = document.getElementById("transcribe-btn");
+const correctBtn = document.getElementById("correct-btn");
 const summarizeBtn = document.getElementById("summarize-btn");
 const statusEl = document.getElementById("status");
 const transcriptSection = document.getElementById("transcript-section");
@@ -45,17 +46,8 @@ form.addEventListener("submit", async (event) => {
     transcriptSection.hidden = true;
     showStatus(I18N.js_status_recognizing);
 
-    const correctionPrompt = document.getElementById("correction-prompt-input").value.trim();
-    const model = modelSelect.value.trim();
-
     const formData = new FormData();
     formData.append("file", file);
-    if (correctionPrompt) {
-        formData.append("correction_prompt", correctionPrompt);
-    }
-    if (model) {
-        formData.append("correction_model", model);
-    }
 
     try {
         const response = await fetch(`${API_BASE_URL}/transcription/transcribe`, {
@@ -142,6 +134,38 @@ chatClearBtn.addEventListener("click", () => {
     chatHistory = [];
     renderChatHistory();
     showChatStatus("");
+});
+
+correctBtn.addEventListener("click", async () => {
+    const text = transcriptEl.value.trim();
+    if (!text) return;
+
+    correctBtn.disabled = true;
+    showStatus(I18N.js_status_correcting);
+
+    const correctionPrompt = document.getElementById("correction-prompt-input").value.trim();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/transcription/correct`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                text,
+                prompt: correctionPrompt || null,
+                model: modelSelect.value.trim() || null,
+            }),
+        });
+        if (!response.ok) {
+            throw new Error(await parseError(response));
+        }
+        const data = await response.json();
+        transcriptEl.value = data.corrected_text;
+        showStatus(I18N.js_status_done);
+    } catch (err) {
+        showStatus(`${I18N.js_error_correction_prefix}${err.message}`, true);
+    } finally {
+        correctBtn.disabled = false;
+    }
 });
 
 summarizeBtn.addEventListener("click", async () => {

@@ -26,8 +26,6 @@
 
         <form id="upload-form" class="transcription-form">
             <input type="file" id="file-input" name="file" accept="audio/*,video/*" required>
-            <label for="correction-prompt-input">{{ t('correction_prompt_label') }}</label>
-            <textarea id="correction-prompt-input" rows="8">{{ t('correction_prompt_default') }}</textarea>
             <button type="submit" id="transcribe-btn">{{ t('transcribe_btn') }}</button>
         </form>
 
@@ -38,6 +36,11 @@
             <textarea id="transcript" rows="10"></textarea>
             <div class="button-row">
                 <button type="button" id="download-transcript-btn">{{ t('download_transcript_btn') }}</button>
+            </div>
+            <label for="correction-prompt-input">{{ t('correction_prompt_label') }}</label>
+            <textarea id="correction-prompt-input" rows="8">{{ t('correction_prompt_default') }}</textarea>
+            <div class="button-row">
+                <button type="button" id="correct-btn">{{ t('correct_btn') }}</button>
             </div>
             <label for="summary-prompt-input">{{ t('summary_prompt_label') }}</label>
             <textarea id="summary-prompt-input" rows="6">{{ t('summary_prompt_default') }}</textarea>
