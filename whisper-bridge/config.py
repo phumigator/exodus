@@ -11,9 +11,9 @@ class Settings(BaseSettings):
     # (env_prefix ниже уже добавляет BRIDGE_, поле не должно повторять его)
     shared_secret: str = ""
 
-    # Уже работающий с VPS контейнер whisper-test (проект docker-stack),
+    # Уже работающий с VPS контейнер whisper-service (проект docker-stack),
     # доступен по имени в общей сети ai-network, наружу не опубликован
-    whisper_internal_url: str = "http://whisper-test:9000"
+    whisper_internal_url: str = "http://whisper-service:9000"
 
     # OpenRouter — коррекция грамматики/смысла распознанного текста
     openrouter_api_key: str = ""
