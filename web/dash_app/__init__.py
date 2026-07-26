@@ -9,39 +9,8 @@ from .callbacks_curve import register_callbacks as register_curve
 from .callbacks_points import register_callbacks as register_points
 from .callbacks_bonds import register_callbacks as register_bonds
 from .callbacks_utils import register_callbacks as register_utils
-from .i18n import current_lang, t
-
-
-def _build_nav_html():
-    """Тот же постоянный навбар, что и на Flask-страницах (web/templates/_nav.html),
-    но захардкожен и построен на лету, т.к. Dash не использует Jinja — язык и
-    активная ссылка переключателя языка берутся из cookie на каждый запрос."""
-    lang = current_lang()
-    nav_links = [
-        ("/", t('nav_home')),
-        ("/zcyc/", t('nav_zcyc')),
-        ("/transcription", t('nav_transcription')),
-        ("/analytics/", t('nav_analytics')),
-        ("/about", t('nav_about')),
-    ]
-    items = []
-    for href, label in nav_links:
-        active_cls = ' class="active"' if href == "/zcyc/" else ''
-        items.append(f'<li><a href="{href}"{active_cls}>{label}</a></li>')
-    links_html = "\n        ".join(items)
-    ru_cls = ' class="active"' if lang == 'ru' else ''
-    en_cls = ' class="active"' if lang == 'en' else ''
-
-    return f"""<nav class="pipboy-nav">
-    <a class="brand" href="/">PHUMIGATOR EXODUS</a>
-    <ul>
-        {links_html}
-    </ul>
-    <div class="lang-switch">
-        <a href="/set-language?lang=ru&next=/zcyc/"{ru_cls}>RU</a>
-        <a href="/set-language?lang=en&next=/zcyc/"{en_cls}>EN</a>
-    </div>
-</nav>"""
+from .i18n import current_lang
+from nav import build_nav_html
 
 
 def create_dash_app(server, url_base_pathname="/zcyc/"):
@@ -69,8 +38,8 @@ def create_dash_app(server, url_base_pathname="/zcyc/"):
     {css}
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body class="pipboy-page zcyc-page">
-    {_build_nav_html()}
+<body class="pipboy-page dash-pipboy zcyc-page">
+    {build_nav_html("/zcyc/")}
     {app_entry}
     <footer>
         {config}

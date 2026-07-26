@@ -4,36 +4,37 @@ import plotly.graph_objects as go
 from dash import Input, Output
 
 from . import data
-from .theme import (
-    BASELINE,
-    FONT_FAMILY,
-    GRIDLINE,
-    SENTIMENT_COLORS,
-    SENTIMENT_LABELS_RU,
-    SEQUENTIAL_BLUE,
-    SURFACE,
-    TEXT_MUTED,
-    TEXT_PRIMARY,
-)
-
-BASE_LAYOUT = dict(
-    paper_bgcolor=SURFACE,
-    plot_bgcolor=SURFACE,
-    font=dict(family=FONT_FAMILY, color=TEXT_PRIMARY, size=13),
-    margin=dict(l=10, r=10, t=40, b=10),
-)
+from .theme import SENTIMENT_COLORS, SEQUENTIAL_BLUE
+from dash_app.i18n import pip_colors, t
 
 
-def _empty_figure(title):
+def _sentiment_labels():
+    return {
+        "positive": t("analytics_sentiment_positive"),
+        "negative": t("analytics_sentiment_negative"),
+        "neutral": t("analytics_sentiment_neutral"),
+    }
+
+
+def _base_layout(colors):
+    return dict(
+        paper_bgcolor=colors["panel"],
+        plot_bgcolor=colors["panel"],
+        font=dict(color=colors["text"], size=13),
+        margin=dict(l=10, r=10, t=40, b=10),
+    )
+
+
+def _empty_figure(title, colors):
     fig = go.Figure()
-    fig.update_layout(title=title, **BASE_LAYOUT)
-    fig.add_annotation(text="Нет данных за выбранный период", showarrow=False, font=dict(color=TEXT_MUTED))
+    fig.update_layout(title=title, **_base_layout(colors))
+    fig.add_annotation(text=t("analytics_chart_no_data"), showarrow=False, font=dict(color=colors["text"]))
     return fig
 
 
-def _chart_by_company(df):
+def _chart_by_company(df, colors):
     if df.empty:
-        return _empty_figure("Новости по компаниям")
+        return _empty_figure(t("analytics_chart_by_company_title"), colors)
     counts = df.groupby("company_name").size().sort_values(ascending=True).tail(15)
     fig = go.Figure(
         go.Bar(
@@ -44,17 +45,17 @@ def _chart_by_company(df):
         )
     )
     fig.update_layout(
-        title="Новости по компаниям (топ-15)",
-        xaxis=dict(gridcolor=GRIDLINE, zeroline=False),
-        yaxis=dict(gridcolor=GRIDLINE),
-        **BASE_LAYOUT,
+        title=t("analytics_chart_by_company_title"),
+        xaxis=dict(gridcolor=colors["dim"], zeroline=False),
+        yaxis=dict(gridcolor=colors["dim"]),
+        **_base_layout(colors),
     )
     return fig
 
 
-def _chart_timeline(df):
+def _chart_timeline(df, colors):
     if df.empty:
-        return _empty_figure("Динамика новостей")
+        return _empty_figure(t("analytics_chart_timeline_title"), colors)
     daily = df.groupby("news_date").size().reset_index(name="count").sort_values("news_date")
     fig = go.Figure(
         go.Scatter(
@@ -67,19 +68,20 @@ def _chart_timeline(df):
         )
     )
     fig.update_layout(
-        title="Динамика количества новостей",
-        xaxis=dict(gridcolor=GRIDLINE, zeroline=False),
-        yaxis=dict(gridcolor=GRIDLINE, zeroline=False),
-        **BASE_LAYOUT,
+        title=t("analytics_chart_timeline_title"),
+        xaxis=dict(gridcolor=colors["dim"], zeroline=False),
+        yaxis=dict(gridcolor=colors["dim"], zeroline=False),
+        **_base_layout(colors),
     )
     return fig
 
 
-def _chart_sentiment_diverging(df):
+def _chart_sentiment_diverging(df, colors):
     """Diverging stacked bar по компаниям, отцентрированный на нейтральной тональности."""
     if df.empty:
-        return _empty_figure("Тональность по компаниям")
+        return _empty_figure(t("analytics_chart_sentiment_title"), colors)
 
+    labels = _sentiment_labels()
     pivot = df.pivot_table(index="company_name", columns="sentiment", values="id", aggfunc="count", fill_value=0)
     for s in ("negative", "neutral", "positive"):
         if s not in pivot.columns:
@@ -92,7 +94,7 @@ def _chart_sentiment_diverging(df):
     fig = go.Figure()
     fig.add_trace(
         go.Bar(
-            name=SENTIMENT_LABELS_RU["negative"],
+            name=labels["negative"],
             y=pivot.index,
             x=pivot["negative"],
             base=-(pivot["negative"] + half_neutral),
@@ -102,7 +104,7 @@ def _chart_sentiment_diverging(df):
     )
     fig.add_trace(
         go.Bar(
-            name=SENTIMENT_LABELS_RU["neutral"],
+            name=labels["neutral"],
             y=pivot.index,
             x=pivot["neutral"],
             base=-half_neutral,
@@ -112,7 +114,7 @@ def _chart_sentiment_diverging(df):
     )
     fig.add_trace(
         go.Bar(
-            name=SENTIMENT_LABELS_RU["positive"],
+            name=labels["positive"],
             y=pivot.index,
             x=pivot["positive"],
             base=half_neutral,
@@ -121,12 +123,12 @@ def _chart_sentiment_diverging(df):
         )
     )
     fig.update_layout(
-        title="Тональность по компаниям (топ-15 по объёму)",
+        title=t("analytics_chart_sentiment_title"),
         barmode="overlay",
-        xaxis=dict(gridcolor=GRIDLINE, zeroline=True, zerolinecolor=BASELINE),
-        yaxis=dict(gridcolor=GRIDLINE),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        **BASE_LAYOUT,
+        xaxis=dict(gridcolor=colors["dim"], zeroline=True, zerolinecolor=colors["dim"]),
+        yaxis=dict(gridcolor=colors["dim"]),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color=colors["text"])),
+        **_base_layout(colors),
     )
     return fig
 
@@ -155,6 +157,8 @@ def register_callbacks(app):
     )
     def update_dashboard(start_date, end_date, companies, sentiments):
         df = data.load_news(date_from=start_date, date_to=end_date, companies=companies, sentiments=sentiments)
+        colors = pip_colors()
+        labels = _sentiment_labels()
 
         total = len(df)
         positive = int((df["sentiment"] == "positive").sum()) if not df.empty else 0
@@ -163,7 +167,7 @@ def register_callbacks(app):
 
         table_df = df.copy()
         if not table_df.empty:
-            table_df["sentiment_label"] = table_df["sentiment"].map(SENTIMENT_LABELS_RU).fillna(table_df["sentiment"])
+            table_df["sentiment_label"] = table_df["sentiment"].map(labels).fillna(table_df["sentiment"])
             table_df["news_date"] = pd.to_datetime(table_df["news_date"]).dt.strftime("%Y-%m-%d")
 
         return (
@@ -171,8 +175,8 @@ def register_callbacks(app):
             positive,
             negative,
             companies_count,
-            _chart_by_company(df),
-            _chart_timeline(df),
-            _chart_sentiment_diverging(df),
+            _chart_by_company(df, colors),
+            _chart_timeline(df, colors),
+            _chart_sentiment_diverging(df, colors),
             table_df.to_dict("records"),
         )

@@ -4,22 +4,33 @@ import datetime as dt
 from dash import dash_table, dcc, html
 import dash_bootstrap_components as dbc
 
-from .theme import TEXT_MUTED
+from dash_app.i18n import pip_colors, t
 
-TABLE_COLUMNS = [
-    {"name": "Дата", "id": "news_date"},
-    {"name": "Компания", "id": "company_name"},
-    {"name": "Заголовок", "id": "title"},
-    {"name": "Тональность", "id": "sentiment_label"},
-    {"name": "Источник", "id": "source"},
-]
+
+def _table_columns():
+    return [
+        {"name": t("analytics_col_date"), "id": "news_date"},
+        {"name": t("analytics_col_company"), "id": "company_name"},
+        {"name": t("analytics_col_title"), "id": "title"},
+        {"name": t("analytics_col_sentiment"), "id": "sentiment_label"},
+        {"name": t("analytics_col_source"), "id": "source"},
+    ]
+
+
+def _sentiment_options():
+    return [
+        {"label": t("analytics_sentiment_positive"), "value": "positive"},
+        {"label": t("analytics_sentiment_negative"), "value": "negative"},
+        {"label": t("analytics_sentiment_neutral"), "value": "neutral"},
+    ]
 
 
 def stat_tile(tile_id, label):
+    colors = pip_colors()
     return dbc.Card(
         dbc.CardBody(
             [
-                html.Div(label, className="stat-tile-label", style={"color": TEXT_MUTED, "fontSize": "13px"}),
+                html.Div(label, className="stat-tile-label", style={"color": colors["text"], "fontSize": "13px"}),
                 html.Div(id=tile_id, className="stat-tile-value", style={"fontSize": "32px", "fontWeight": "600"}),
             ]
         ),
@@ -30,11 +41,12 @@ def stat_tile(tile_id, label):
 def create_layout():
     today = dt.date.today()
     default_start = today - dt.timedelta(days=30)
+    colors = pip_colors()
 
     return dbc.Container(
         [
-            html.H2("NEWS ANALYTICS", style={"marginTop": "20px"}),
-            html.Div("Сводка новостей по компаниям (источник: vedomosti.ru, классификация LLM)", style={"color": TEXT_MUTED, "marginBottom": "20px"}),
+            html.H2(t("analytics_header_title"), style={"marginTop": "20px"}),
+            html.Div(t("analytics_header_subtitle"), style={"color": colors["text"], "marginBottom": "20px"}),
 
             # Filters — одна строка над графиками
             dbc.Row(
@@ -52,20 +64,16 @@ def create_layout():
                         dcc.Dropdown(
                             id="filter-companies",
                             multi=True,
-                            placeholder="Все компании",
+                            placeholder=t("analytics_filter_companies_placeholder"),
                         ),
                         width=4,
                     ),
                     dbc.Col(
                         dcc.Dropdown(
                             id="filter-sentiment",
-                            options=[
-                                {"label": "Позитив", "value": "positive"},
-                                {"label": "Негатив", "value": "negative"},
-                                {"label": "Нейтрально", "value": "neutral"},
-                            ],
+                            options=_sentiment_options(),
                             multi=True,
-                            placeholder="Все тональности",
+                            placeholder=t("analytics_filter_sentiment_placeholder"),
                         ),
                         width=3,
                     ),
@@ -77,10 +85,10 @@ def create_layout():
             # KPI row
             dbc.Row(
                 [
-                    dbc.Col(stat_tile("kpi-total", "Всего новостей"), width=3),
-                    dbc.Col(stat_tile("kpi-positive", "Позитивных"), width=3),
-                    dbc.Col(stat_tile("kpi-negative", "Негативных"), width=3),
-                    dbc.Col(stat_tile("kpi-companies", "Компаний в выборке"), width=3),
+                    dbc.Col(stat_tile("kpi-total", t("analytics_kpi_total")), width=3),
+                    dbc.Col(stat_tile("kpi-positive", t("analytics_kpi_positive")), width=3),
+                    dbc.Col(stat_tile("kpi-negative", t("analytics_kpi_negative")), width=3),
+                    dbc.Col(stat_tile("kpi-companies", t("analytics_kpi_companies")), width=3),
                 ],
                 className="mb-4 g-3",
             ),
@@ -101,14 +109,29 @@ def create_layout():
             ),
 
             # Table
-            html.H5("Новости"),
+            html.H5(t("analytics_table_heading")),
             dash_table.DataTable(
                 id="news-table",
-                columns=TABLE_COLUMNS,
+                columns=_table_columns(),
                 page_size=15,
                 style_table={"overflowX": "auto"},
-                style_cell={"textAlign": "left", "fontFamily": "system-ui, sans-serif", "padding": "8px", "maxWidth": "400px", "overflow": "hidden", "textOverflow": "ellipsis"},
-                style_header={"fontWeight": "600", "backgroundColor": "#f9f9f7"},
+                style_cell={
+                    "textAlign": "left",
+                    "fontFamily": "system-ui, sans-serif",
+                    "padding": "8px",
+                    "maxWidth": "400px",
+                    "overflow": "hidden",
+                    "textOverflow": "ellipsis",
+                    "backgroundColor": colors["panel"],
+                    "color": colors["text"],
+                },
+                style_header={
+                    "fontWeight": "600",
+                    "backgroundColor": colors["panel"],
+                    "color": colors["green"],
+                    "border": f"1px solid {colors['dim']}",
+                },
+                style_data={"border": f"1px solid {colors['dim']}"},
             ),
         ],
         fluid=True,

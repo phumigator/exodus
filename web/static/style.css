@@ -565,12 +565,14 @@ body.pipboy-page .timeline-item strong {
     color: var(--pip-green);
 }
 
-/* ---------- Pip-Boy reskin for the ZCYC Dash app (dbc/dcc/dash_table) ---------- */
-/* dash_table header/cell backgrounds are set inline from Python (i18n.pip_colors,
-   see dash_app/layout.py & callbacks_curve.py) since CSS can't win over inline
-   style attributes; everything below covers what CSS *can* reach. */
+/* ---------- Pip-Boy reskin, shared by every Dash sub-app (dbc/dcc/dash_table) ---------- */
+/* Scoped to body.dash-pipboy, set by both dash_app and analytics_app, so ZCYC
+   and News Analytics stay visually identical instead of drifting apart.
+   dash_table header/cell backgrounds are set inline from Python (dash_app.i18n.pip_colors,
+   reused by analytics_app) since CSS can't win over inline style attributes;
+   everything below covers what CSS *can* reach. */
 
-body.zcyc-page h1 {
+body.dash-pipboy h1 {
     color: var(--pip-green);
     text-shadow: var(--pip-glow);
 }
@@ -579,24 +581,24 @@ body.zcyc-page h1 {
    above; card-header and Bootstrap's forced text-color utilities still need
    neutralizing (Bootstrap ships bg-primary/bg-info/... and text-white/text-dark
    as plain utility classes, so ours — loaded after bootstrap.css — wins). */
-body.zcyc-page .card-header[class*="bg-"] {
+body.dash-pipboy .card-header[class*="bg-"] {
     background: rgba(var(--pip-green-rgb), .12) !important;
     border-bottom: 1px solid var(--pip-green-dim);
 }
 
-body.zcyc-page .text-white,
-body.zcyc-page .text-dark {
+body.dash-pipboy .text-white,
+body.dash-pipboy .text-dark {
     color: var(--pip-green) !important;
     text-shadow: var(--pip-glow);
 }
 
-body.zcyc-page .text-muted {
+body.dash-pipboy .text-muted {
     color: var(--pip-text) !important;
     opacity: .8;
 }
 
-body.zcyc-page label,
-body.zcyc-page .form-check-label {
+body.dash-pipboy label,
+body.dash-pipboy .form-check-label {
     color: var(--pip-text);
 }
 
@@ -605,91 +607,112 @@ body.zcyc-page .form-check-label {
    styling the input alone leaves the wrapper's own (light) background showing.
    Dash injects this component's CSS via a runtime <style> tag placed after
    style.css, so !important is needed to win the cascade (see slider note above). */
-body.zcyc-page .dash-input-container {
+body.dash-pipboy .dash-input-container {
     background: var(--pip-input-bg) !important;
     border: 1px solid var(--pip-green-dim) !important;
 }
 
-body.zcyc-page .dash-input-element {
+body.dash-pipboy .dash-input-element {
     color: var(--pip-green) !important;
 }
 
-body.zcyc-page .dash-input-stepper {
+body.dash-pipboy .dash-input-stepper {
     background: var(--pip-panel) !important;
     color: var(--pip-green) !important;
 }
 
-body.zcyc-page input[type="checkbox"],
-body.zcyc-page input[type="radio"] {
+body.dash-pipboy input[type="checkbox"],
+body.dash-pipboy input[type="radio"] {
     accent-color: var(--pip-green);
 }
 
 /* dcc.Dropdown (Dash's own "dash-dropdown-*" markup, not react-select) */
-body.zcyc-page .dash-dropdown-grid-container.dash-dropdown-trigger {
+body.dash-pipboy .dash-dropdown-grid-container.dash-dropdown-trigger {
     background: var(--pip-input-bg);
     border: 1px solid var(--pip-green-dim);
     border-radius: 4px;
     color: var(--pip-green);
 }
 
-body.zcyc-page .dash-dropdown-value,
-body.zcyc-page .dash-dropdown-value-item {
+body.dash-pipboy .dash-dropdown-value,
+body.dash-pipboy .dash-dropdown-value-item {
     color: var(--pip-green);
 }
 
-body.zcyc-page .dash-dropdown-placeholder {
+body.dash-pipboy .dash-dropdown-placeholder {
     color: var(--pip-green-dim);
 }
 
-body.zcyc-page .dash-dropdown-options {
+body.dash-pipboy .dash-dropdown-options {
     background: var(--pip-panel);
     border: 1px solid var(--pip-green-dim);
 }
 
-body.zcyc-page .dash-dropdown-option {
+body.dash-pipboy .dash-dropdown-option {
     color: var(--pip-text);
 }
 
-body.zcyc-page .dash-dropdown-option:hover,
-body.zcyc-page .dash-dropdown-option[aria-selected="true"] {
+body.dash-pipboy .dash-dropdown-option:hover,
+body.dash-pipboy .dash-dropdown-option[aria-selected="true"] {
     background: rgba(var(--pip-green-rgb), .15);
     color: var(--pip-green);
+}
+
+/* dcc.DatePickerRange (react-dates) — only the always-visible input boxes are
+   restyled; the calendar popup keeps its default light look (transient
+   overlay, not worth fighting react-dates' own injected CSS for). */
+body.dash-pipboy .DateRangePickerInput {
+    background: var(--pip-input-bg) !important;
+    border: 1px solid var(--pip-green-dim) !important;
+}
+
+body.dash-pipboy .DateInput {
+    background: transparent !important;
+}
+
+body.dash-pipboy .DateInput_input {
+    background: transparent !important;
+    color: var(--pip-green) !important;
+}
+
+body.dash-pipboy .DateRangePickerInput_arrow_svg {
+    fill: var(--pip-green-dim);
 }
 
 /* dcc.Slider / dcc.RangeSlider — Dash injects this component's own CSS chunk
    at runtime (after style.css already parsed), so equal-specificity rules
    lose the cascade; !important is needed to reliably win here. */
-body.zcyc-page .dash-slider-track {
+body.dash-pipboy .dash-slider-track {
     background: var(--pip-green-dim) !important;
 }
 
-body.zcyc-page .dash-slider-range {
+body.dash-pipboy .dash-slider-range {
     background: var(--pip-green) !important;
 }
 
-body.zcyc-page .dash-slider-dot {
+body.dash-pipboy .dash-slider-dot {
     background: var(--pip-panel) !important;
     border-color: var(--pip-green-dim) !important;
 }
 
-body.zcyc-page .dash-slider-thumb {
+body.dash-pipboy .dash-slider-thumb {
     background: var(--pip-green) !important;
     border: 2px solid var(--pip-green) !important;
     box-shadow: var(--pip-glow);
 }
 
-body.zcyc-page .dash-slider-mark {
+body.dash-pipboy .dash-slider-mark {
     color: var(--pip-text);
 }
 
-body.zcyc-page .dash-slider-tooltip {
+body.dash-pipboy .dash-slider-tooltip {
     background: var(--pip-panel) !important;
     color: var(--pip-green) !important;
     border: 1px solid var(--pip-green-dim);
 }
 
 /* Editable min/max number boxes flanking dcc.RangeSlider */
-body.zcyc-page .dash-range-slider-input {
+body.dash-pipboy .dash-range-slider-input {
     background: var(--pip-input-bg) !important;
     color: var(--pip-green) !important;
     border: 1px solid var(--pip-green-dim) !important;
@@ -697,21 +720,27 @@ body.zcyc-page .dash-range-slider-input {
 }
 
 /* dash_table: outer container, filter row, pagination (cell/header colors are inline) */
-body.zcyc-page .dash-table-container {
+body.dash-pipboy .dash-table-container {
     background: var(--pip-panel);
 }
 
-body.zcyc-page .dash-filter input {
+body.dash-pipboy .dash-filter input {
     background: var(--pip-input-bg);
     color: var(--pip-green);
     border: 1px solid var(--pip-green-dim);
 }
 
-body.zcyc-page .previous-page,
-body.zcyc-page .next-page,
-body.zcyc-page .first-page,
-body.zcyc-page .last-page,
-body.zcyc-page .page-number,
-body.zcyc-page .current-page {
+body.dash-pipboy .previous-page,
+body.dash-pipboy .next-page,
+body.dash-pipboy .first-page,
+body.dash-pipboy .last-page,
+body.dash-pipboy .page-number,
+body.dash-pipboy .current-page {
     color: var(--pip-green);
+}
+
+/* KPI tiles (News Analytics stat_tile()) */
+body.dash-pipboy .stat-tile-value {
+    color: var(--pip-green);
+    text-shadow: var(--pip-glow);
 }
