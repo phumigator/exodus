@@ -22,9 +22,6 @@ class Settings(BaseSettings):
     # security policy"); нужен туннель через локальный прокси-клиент. None — без прокси.
     openrouter_proxy_url: str | None = None
 
-    # Postgres на том же удалённом сервере
-    database_url: str = "postgresql://user:password@remote-host:5432/analytics"
-
     cors_origins: list[str] = ["*"]
 
     class Config:
