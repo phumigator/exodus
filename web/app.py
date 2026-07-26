@@ -3,8 +3,13 @@
 """
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from flask import Flask, g, redirect, render_template, request
 
+from analytics_app import create_analytics_app
 from dash_app import create_dash_app
 from translations import DEFAULT_LANG, SUPPORTED_LANGS, TRANSLATIONS, translate
 
@@ -20,6 +25,7 @@ def create_app():
     server = Flask(__name__)
 
     create_dash_app(server, url_base_pathname="/zcyc/")
+    create_analytics_app(server, url_base_pathname="/analytics/")
 
     @server.before_request
     def resolve_language():

@@ -2,6 +2,7 @@
     ('/', t('nav_home')),
     ('/zcyc/', t('nav_zcyc')),
     ('/transcription', t('nav_transcription')),
+    ('/analytics/', t('nav_analytics')),
     ('/about', t('nav_about')),
 ] %}
 <nav class="pipboy-nav">
@@ -10,7 +11,6 @@
         {% for href, label in nav_links %}
         <li><a href="{{ href }}"{% if request.path == href %} class="active"{% endif %}>{{ label }}</a></li>
         {% endfor %}
-        <li><a class="disabled" href="#" tabindex="-1">{{ t('nav_analytics') }}</a></li>
     </ul>
     <div class="lang-switch">
         <a href="/set-language?lang=ru&next={{ request.path }}"{% if g.lang == 'ru' %} class="active"{% endif %}>RU</a>

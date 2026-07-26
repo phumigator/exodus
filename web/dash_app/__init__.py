@@ -21,6 +21,7 @@ def _build_nav_html():
         ("/", t('nav_home')),
         ("/zcyc/", t('nav_zcyc')),
         ("/transcription", t('nav_transcription')),
+        ("/analytics/", t('nav_analytics')),
         ("/about", t('nav_about')),
     ]
     items = []
@@ -35,7 +36,6 @@ def _build_nav_html():
     <a class="brand" href="/">PHUMIGATOR EXODUS</a>
     <ul>
         {links_html}
-        <li><a class="disabled" href="#" tabindex="-1">{t('nav_analytics')}</a></li>
     </ul>
     <div class="lang-switch">
         <a href="/set-language?lang=ru&next=/zcyc/"{ru_cls}>RU</a>
