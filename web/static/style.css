@@ -10,7 +10,7 @@
     --pip-glow: 0 0 6px rgba(var(--pip-green-rgb), .8), 0 0 14px rgba(var(--pip-green-rgb), .35);
     --pip-panel-tint-rgb: 13, 25, 18;
     --pip-msg-rgb: 10, 25, 15;
-    --pip-input-bg: var(--pip-input-bg);
+    --pip-input-bg: #03150a;
 }
 
 /* Английская версия — янтарная Pip-Boy палитра вместо зелёной (те же
@@ -404,6 +404,7 @@ body.pipboy-page {
     color: var(--pip-text);
     font-family: "Courier New", ui-monospace, monospace;
     position: relative;
+    color-scheme: dark;
 }
 
 body.pipboy-page::after {
@@ -459,6 +460,11 @@ body.pipboy-page input[type="file"] {
     background: var(--pip-input-bg);
     color: var(--pip-green);
     border: 1px solid var(--pip-green-dim);
+}
+
+body.pipboy-page select option {
+    background: var(--pip-input-bg);
+    color: var(--pip-green);
 }
 
 body.pipboy-page button {
