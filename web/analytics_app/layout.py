@@ -13,7 +13,7 @@ def _table_columns():
         {"name": t("analytics_col_company"), "id": "company_name"},
         {"name": t("analytics_col_title"), "id": "title"},
         {"name": t("analytics_col_sentiment"), "id": "sentiment_label"},
-        {"name": t("analytics_col_source"), "id": "source"},
+        {"name": t("analytics_col_source"), "id": "source", "presentation": "markdown"},
     ]
 
 
@@ -114,6 +114,7 @@ def create_layout():
                 id="news-table",
                 columns=_table_columns(),
                 page_size=15,
+                markdown_options={"link_target": "_blank"},
                 style_table={"overflowX": "auto"},
                 style_cell={
                     "textAlign": "left",

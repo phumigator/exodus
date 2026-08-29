@@ -1,4 +1,6 @@
 """Callbacks: фильтры -> KPI, графики, таблица."""
+from urllib.parse import urlparse
+
 import pandas as pd
 import plotly.graph_objects as go
 from dash import Input, Output
@@ -133,6 +135,17 @@ def _chart_sentiment_diverging(df, colors):
     return fig
 
 
+def _source_link(source):
+    """`source` в БД бывает полным URL статьи ('https://www.rbc.ru/...') или просто
+    голым доменом ('vedomosti.ru', без схемы) — во втором случае ссылка на конкретную
+    статью недоступна, ведём на главную страницу издания."""
+    if not source:
+        return ""
+    url = source if source.startswith(("http://", "https://")) else f"https://{source}"
+    domain = urlparse(url).netloc.removeprefix("www.") or source
+    return f"[{domain}]({url})"
+
+
 def register_callbacks(app):
     @app.callback(
         Output("filter-companies", "options"),
@@ -169,6 +182,7 @@ def register_callbacks(app):
         if not table_df.empty:
             table_df["sentiment_label"] = table_df["sentiment"].map(labels).fillna(table_df["sentiment"])
             table_df["news_date"] = pd.to_datetime(table_df["news_date"]).dt.strftime("%Y-%m-%d")
+            table_df["source"] = table_df["source"].apply(_source_link)
 
         return (
             f"{total:,}".replace(",", " "),
