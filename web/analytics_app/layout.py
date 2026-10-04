@@ -45,8 +45,7 @@ def create_layout():
 
     return dbc.Container(
         [
-            html.H2(t("analytics_header_title"), style={"marginTop": "20px"}),
-            html.Div(t("analytics_header_subtitle"), style={"color": colors["text"], "marginBottom": "20px"}),
+            html.H2(t("analytics_header_title"), style={"marginTop": "20px", "marginBottom": "20px"}),
 
             # Filters — одна строка над графиками
             dbc.Row(
@@ -66,7 +65,7 @@ def create_layout():
                             multi=True,
                             placeholder=t("analytics_filter_companies_placeholder"),
                         ),
-                        width=4,
+                        width=3,
                     ),
                     dbc.Col(
                         dcc.Dropdown(
@@ -74,6 +73,14 @@ def create_layout():
                             options=_sentiment_options(),
                             multi=True,
                             placeholder=t("analytics_filter_sentiment_placeholder"),
+                        ),
+                        width=2,
+                    ),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id="filter-sources",
+                            multi=True,
+                            placeholder=t("analytics_filter_source_placeholder"),
                         ),
                         width=3,
                     ),

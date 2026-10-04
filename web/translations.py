@@ -210,9 +210,9 @@ TRANSLATIONS = {
         "zcyc_bonds_loaded": "Загружено {count} облигаций.",
         # news analytics dashboard (Dash /analytics/)
         "analytics_header_title": "📈 NEWS ANALYTICS",
-        "analytics_header_subtitle": "Сводка новостей по компаниям (источник: vedomosti.ru, классификация LLM)",
         "analytics_filter_companies_placeholder": "Все компании",
         "analytics_filter_sentiment_placeholder": "Все тональности",
+        "analytics_filter_source_placeholder": "Все источники",
         "analytics_sentiment_positive": "Позитив",
         "analytics_sentiment_negative": "Негатив",
         "analytics_sentiment_neutral": "Нейтрально",
@@ -398,9 +398,9 @@ TRANSLATIONS = {
         "zcyc_bonds_loaded": "Loaded {count} bonds.",
         # news analytics dashboard (Dash /analytics/)
         "analytics_header_title": "📈 NEWS ANALYTICS",
-        "analytics_header_subtitle": "News summary by company (source: vedomosti.ru, LLM classification)",
         "analytics_filter_companies_placeholder": "All companies",
         "analytics_filter_sentiment_placeholder": "All sentiments",
+        "analytics_filter_source_placeholder": "All sources",
         "analytics_sentiment_positive": "Positive",
         "analytics_sentiment_negative": "Negative",
         "analytics_sentiment_neutral": "Neutral",

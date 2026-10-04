@@ -155,6 +155,13 @@ def register_callbacks(app):
         return [{"label": name, "value": name} for name in data.load_company_names()]
 
     @app.callback(
+        Output("filter-sources", "options"),
+        Input("filter-sources", "id"),
+    )
+    def load_source_options(_):
+        return [{"label": domain, "value": domain} for domain in data.load_source_domains()]
+
+    @app.callback(
         Output("kpi-total", "children"),
         Output("kpi-positive", "children"),
         Output("kpi-negative", "children"),
@@ -167,9 +174,12 @@ def register_callbacks(app):
         Input("filter-date-range", "end_date"),
         Input("filter-companies", "value"),
         Input("filter-sentiment", "value"),
+        Input("filter-sources", "value"),
     )
-    def update_dashboard(start_date, end_date, companies, sentiments):
-        df = data.load_news(date_from=start_date, date_to=end_date, companies=companies, sentiments=sentiments)
+    def update_dashboard(start_date, end_date, companies, sentiments, sources):
+        df = data.load_news(
+            date_from=start_date, date_to=end_date, companies=companies, sentiments=sentiments, sources=sources
+        )
         colors = pip_colors()
         labels = _sentiment_labels()
 

@@ -6,6 +6,10 @@ from sqlalchemy import create_engine
 
 _engine = None
 
+# `source` хранится то полным URL статьи, то голым доменом — фильтруем и
+# группируем по домену без схемы и "www." (ср. _source_link в callbacks.py).
+_SOURCE_DOMAIN_SQL = r"regexp_replace(n.source, '^(https?://)?(www\.)?([^/?#]+).*$', '\3')"
+
 
 def get_engine():
     global _engine
@@ -21,7 +25,7 @@ def get_engine():
     return _engine
 
 
-def load_news(date_from=None, date_to=None, companies=None, sentiments=None):
+def load_news(date_from=None, date_to=None, companies=None, sentiments=None, sources=None):
     """Новости с привязкой к компании, с фильтрами. Только записи с распознанной компанией."""
     query = """
         SELECT n.id, n.news_date, n.title, n.content, n.source, n.sentiment,
@@ -43,6 +47,9 @@ def load_news(date_from=None, date_to=None, companies=None, sentiments=None):
     if sentiments:
         query += " AND n.sentiment = ANY(%(sentiments)s)"
         params["sentiments"] = list(sentiments)
+    if sources:
+        query += f" AND {_SOURCE_DOMAIN_SQL} = ANY(%(sources)s)"
+        params["sources"] = list(sources)
     query += " ORDER BY n.news_date DESC, n.id DESC"
 
     return pd.read_sql(query, get_engine(), params=params)
@@ -51,3 +58,17 @@ def load_news(date_from=None, date_to=None, companies=None, sentiments=None):
 def load_company_names():
     df = pd.read_sql("SELECT name FROM companies WHERE is_active = true ORDER BY name", get_engine())
     return df["name"].tolist()
+
+
+def load_source_domains():
+    """Домены источников, по которым есть новости с распознанной компанией."""
+    df = pd.read_sql(
+        f"""
+        SELECT DISTINCT {_SOURCE_DOMAIN_SQL} AS domain
+        FROM news n
+        WHERE n.company_id IS NOT NULL AND n.source IS NOT NULL AND n.source <> ''
+        ORDER BY domain
+        """,
+        get_engine(),
+    )
+    return df["domain"].tolist()
