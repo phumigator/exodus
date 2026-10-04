@@ -8,8 +8,11 @@ _engine = None
 
 # `source` хранится то полным URL статьи, то голым доменом — фильтруем и
 # группируем по домену без схемы и "www." (ср. _source_link в callbacks.py).
-_SOURCE_DOMAIN_SQL = r"regexp_replace(n.source, '^(https?://)?(www\.)?([^/?#]+).*$', '\3')"
+# Пустой/NULL source сворачивается в '' — чтобы такие записи тоже были видны в фильтре.
+_SOURCE_DOMAIN_SQL = r"COALESCE(regexp_replace(btrim(n.source), '^(https?://)?(www\.)?([^/?#]+).*$', '\3'), '')"
 
+# Значение пункта "без источника" в фильтре (Dropdown не дружит с пустой строкой).
+EMPTY_SOURCE = "__empty__"
 
 def get_engine():
     global _engine
@@ -25,50 +28,55 @@ def get_engine():
     return _engine
 
 
+def _filters(date_from=None, date_to=None, companies=None, sentiments=None, sources=None):
+    """WHERE-условия для news n JOIN companies c и их параметры."""
+    clauses, params = [], {}
+    if date_from:
+        clauses.append("n.news_date >= %(date_from)s")
+        params["date_from"] = date_from
+    if date_to:
+        clauses.append("n.news_date <= %(date_to)s")
+        params["date_to"] = date_to
+    if companies:
+        clauses.append("c.name = ANY(%(companies)s)")
+        params["companies"] = list(companies)
+    if sentiments:
+        clauses.append("n.sentiment = ANY(%(sentiments)s)")
+        params["sentiments"] = list(sentiments)
+    if sources:
+        clauses.append(f"{_SOURCE_DOMAIN_SQL} = ANY(%(sources)s)")
+        params["sources"] = ["" if s == EMPTY_SOURCE else s for s in sources]
+    return "".join(f" AND {c}" for c in clauses), params
+
+
 def load_news(date_from=None, date_to=None, companies=None, sentiments=None, sources=None):
     """Новости с привязкой к компании, с фильтрами. Только записи с распознанной компанией."""
-    query = """
+    where, params = _filters(date_from, date_to, companies, sentiments, sources)
+    query = f"""
         SELECT n.id, n.news_date, n.title, n.content, n.source, n.sentiment,
                c.id AS company_id, c.name AS company_name
         FROM news n
         JOIN companies c ON c.id = n.company_id
-        WHERE 1=1
+        WHERE 1=1{where}
+        ORDER BY n.news_date DESC, n.id DESC
     """
-    params = {}
-    if date_from:
-        query += " AND n.news_date >= %(date_from)s"
-        params["date_from"] = date_from
-    if date_to:
-        query += " AND n.news_date <= %(date_to)s"
-        params["date_to"] = date_to
-    if companies:
-        query += " AND c.name = ANY(%(companies)s)"
-        params["companies"] = list(companies)
-    if sentiments:
-        query += " AND n.sentiment = ANY(%(sentiments)s)"
-        params["sentiments"] = list(sentiments)
-    if sources:
-        query += f" AND {_SOURCE_DOMAIN_SQL} = ANY(%(sources)s)"
-        params["sources"] = list(sources)
-    query += " ORDER BY n.news_date DESC, n.id DESC"
-
     return pd.read_sql(query, get_engine(), params=params)
-
 
 def load_company_names():
     df = pd.read_sql("SELECT name FROM companies WHERE is_active = true ORDER BY name", get_engine())
     return df["name"].tolist()
 
 
-def load_source_domains():
-    """Домены источников, по которым есть новости с распознанной компанией."""
-    df = pd.read_sql(
-        f"""
-        SELECT DISTINCT {_SOURCE_DOMAIN_SQL} AS domain
+def load_source_counts(date_from=None, date_to=None, companies=None, sentiments=None):
+    """Все домены источников (включая пустые и кривые) с числом новостей
+    при текущих фильтрах — чтобы аномалии в `source` сразу были видны."""
+    where, params = _filters(date_from, date_to, companies, sentiments)
+    query = f"""
+        SELECT {_SOURCE_DOMAIN_SQL} AS domain, count(*) AS cnt
         FROM news n
-        WHERE n.company_id IS NOT NULL AND n.source IS NOT NULL AND n.source <> ''
-        ORDER BY domain
-        """,
-        get_engine(),
-    )
-    return df["domain"].tolist()
+        JOIN companies c ON c.id = n.company_id
+        WHERE 1=1{where}
+        GROUP BY 1
+        ORDER BY 2 DESC, 1
+    """
+    return pd.read_sql(query, get_engine(), params=params)

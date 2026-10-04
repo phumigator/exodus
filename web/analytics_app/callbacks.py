@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Input, Output
+from dash import Input, Output, State
 
 from . import data
 from .theme import SENTIMENT_COLORS, SEQUENTIAL_BLUE
@@ -156,10 +156,26 @@ def register_callbacks(app):
 
     @app.callback(
         Output("filter-sources", "options"),
-        Input("filter-sources", "id"),
+        Input("filter-date-range", "start_date"),
+        Input("filter-date-range", "end_date"),
+        Input("filter-companies", "value"),
+        Input("filter-sentiment", "value"),
+        State("filter-sources", "value"),
     )
-    def load_source_options(_):
-        return [{"label": domain, "value": domain} for domain in data.load_source_domains()]
+    def load_source_options(start_date, end_date, companies, sentiments, selected):
+        """Список источников пересчитывается при каждой смене остальных фильтров."""
+        counts = data.load_source_counts(
+            date_from=start_date, date_to=end_date, companies=companies, sentiments=sentiments
+        )
+        def option(value, cnt):
+            name = t("analytics_source_empty") if value == data.EMPTY_SOURCE else value
+            return {"label": f"{name} ({cnt})", "value": value}
+
+        options = [option(domain or data.EMPTY_SOURCE, cnt) for domain, cnt in zip(counts["domain"], counts["cnt"])]
+        # Уже выбранные источники, которых нет в текущей выборке, не выкидываем из списка
+        present = {o["value"] for o in options}
+        options += [option(v, 0) for v in (selected or []) if v not in present]
+        return options
 
     @app.callback(
         Output("kpi-total", "children"),
