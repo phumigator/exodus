@@ -68,14 +68,18 @@ main {
     padding: 2rem 1rem;
 }
 
+/* flex, а не grid: неполный последний ряд карточек тоже выравнивается по центру */
 .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1.5rem;
     margin-top: 1.5rem;
 }
 
 .card {
+    flex: 0 1 260px;
+    text-align: center;
     background: #fff;
     border-radius: 8px;
     padding: 1.5rem;
