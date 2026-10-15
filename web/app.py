@@ -77,8 +77,6 @@ def create_app():
             abort(404)
         return render_template("game.html", slug=slug, build=find_unity_build(slug))
 
-    # В проде эти файлы раздаёт nginx напрямую (см. nginx/exodus.conf),
-    # роут нужен для локального запуска без nginx.
     @server.route("/games-build/<slug>/<path:filename>")
     def game_build_file(slug, filename):
         if slug not in GAMES:

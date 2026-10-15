@@ -1,10 +1,9 @@
 """
 Браузерные игры (Unity WebGL): реестр игр и поиск файлов сборки.
 
-Сборки не хранятся в git: каждая лежит в EXODUS_GAMES_DIR/<slug>/ ровно в
-том виде, в каком её выдаёт Unity (Build/, TemplateData/, index.html).
-В проде nginx отдаёт эту папку под /games-build/ с нужными Content-Encoding
-и MIME-типами, Flask только находит имена файлов для страницы игры.
+Каждая сборка лежит в EXODUS_GAMES_DIR/<slug>/ (по умолчанию web/games_builds/)
+ровно в том виде, в каком её выдаёт Unity (Build/, TemplateData/, index.html),
+и раздаётся Flask под /games-build/<slug>/ с нужными Content-Encoding и MIME.
 """
 import os
 from pathlib import Path

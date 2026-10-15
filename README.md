@@ -71,14 +71,13 @@ exodus/
 из `web/games.py`, страница игры — `/games/<slug>`. Пока сборки нет,
 на странице показывается заглушка.
 
-Сборки в git не хранятся. Папку, которую выдаёт Unity (`Build/`, `TemplateData/`, …),
-нужно положить в `EXODUS_GAMES_DIR/<slug>/`, например
-`/var/www/exodus-games/seaplane/Build/Seaplane.loader.js`:
+Сборка лежит в git как есть, в том виде, в каком её выдаёт Unity:
+`web/games_builds/<slug>/` (`Build/`, `TemplateData/`, `index.html`), например
+`web/games_builds/seaplane/Build/Seaplane.loader.js`. Её отдаёт сам Flask
+под `/games-build/<slug>/…` (папку можно переопределить через `EXODUS_GAMES_DIR`).
+Сборка собрана с Gzip + Decompression Fallback (файлы `.unityweb`), поэтому
+особые заголовки в nginx не нужны. Если пересобрать её с Brotli/Gzip без fallback
+(`.br`/`.gz`), Flask сам выставит `Content-Encoding`, а Brotli в браузере работает только по HTTPS.
 
-1. Web-сервису задать `EXODUS_GAMES_DIR=/var/www/exodus-games` (локально по
-   умолчанию `web/games_builds/`, там файлы отдаёт сам Flask).
-2. В nginx та же папка указана в `location ^~ /games-build/` (`nginx/exodus.conf`):
-   он отдаёт сжатые `.br`/`.gz` файлы с `Content-Encoding` и правильными MIME,
-   иначе загрузчик Unity не стартует. Brotli в браузере работает только по HTTPS.
-3. Новая игра: добавить slug в `GAMES` (`web/games.py`) и строки
-   `game_<slug>_title` / `game_<slug>_desc` в `web/translations.py`.
+Новая игра: добавить slug в `GAMES` (`web/games.py`) и строки
+`game_<slug>_title` / `game_<slug>_desc` в `web/translations.py`.
