@@ -12,6 +12,7 @@ NAV_LINKS = [
     ("/zcyc/", "nav_zcyc"),
     ("/transcription", "nav_transcription"),
     ("/analytics/", "nav_analytics"),
+    ("/games", "nav_games"),
     ("/about", "nav_about"),
 ]
 

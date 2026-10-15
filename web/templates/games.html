@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="{{ g.lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ t('games_page_title') }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="pipboy-page">
+    {% include "_nav.html" %}
+    <header>
+        <h1>{{ t('games_header_title') }}</h1>
+        <p>{{ t('games_header_subtitle') }}</p>
+    </header>
+    <main>
+        <div class="cards">
+            {% for slug, ready in games %}
+            <a class="card" href="/games/{{ slug }}">
+                {% if ready %}
+                <span class="badge">{{ t('badge_available') }}</span>
+                {% else %}
+                <span class="badge soon">{{ t('badge_soon') }}</span>
+                {% endif %}
+                <h2>{{ t('game_' ~ slug ~ '_title') }}</h2>
+                <p>{{ t('game_' ~ slug ~ '_desc') }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </main>
+    <footer>
+        Phumigator Exodus &mdash; <a href="/">{{ t('footer_home_link') }}</a>
+    </footer>
+</body>
+</html>

@@ -7,10 +7,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from flask import Flask, g, redirect, render_template, request
+from flask import Flask, abort, g, redirect, render_template, request
 
 from analytics_app import create_analytics_app
 from dash_app import create_dash_app
+from games import GAMES, find_unity_build, send_build_file
 from translations import DEFAULT_LANG, SUPPORTED_LANGS, TRANSLATIONS, translate
 
 # В проде nginx проксирует FastAPI под /api/ (см. nginx/exodus.conf);
@@ -62,6 +63,27 @@ def create_app():
             api_base_url=API_BASE_URL,
             i18n_json={key: translate(g.lang, key) for key in TRANSLATIONS[DEFAULT_LANG] if key.startswith("js_")},
         )
+
+    @server.route("/games")
+    def games():
+        return render_template(
+            "games.html",
+            games=[(slug, find_unity_build(slug) is not None) for slug in GAMES],
+        )
+
+    @server.route("/games/<slug>")
+    def game(slug):
+        if slug not in GAMES:
+            abort(404)
+        return render_template("game.html", slug=slug, build=find_unity_build(slug))
+
+    # В проде эти файлы раздаёт nginx напрямую (см. nginx/exodus.conf),
+    # роут нужен для локального запуска без nginx.
+    @server.route("/games-build/<slug>/<path:filename>")
+    def game_build_file(slug, filename):
+        if slug not in GAMES:
+            abort(404)
+        return send_build_file(slug, filename)
 
     return server
 

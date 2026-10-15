@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="{{ g.lang }}">
+<head>
+    <meta charset="UTF-8">
+    {# user-scalable=no: двойной тап и щипок по сенсорным кнопкам игры не должны зумить страницу #}
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>{{ t('game_' ~ slug ~ '_title') }} — Phumigator Exodus</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="pipboy-page game-page">
+    {% include "_nav.html" %}
+    <main class="game-main">
+        <div class="game-toolbar">
+            <a href="/games">{{ t('game_back') }}</a>
+            <h1>{{ t('game_' ~ slug ~ '_title') }}</h1>
+            {% if build %}
+            <button type="button" id="game-fullscreen">{{ t('game_fullscreen') }}</button>
+            {% endif %}
+        </div>
+
+        {% if build %}
+        <div class="game-frame" id="game-frame">
+            <canvas id="unity-canvas" tabindex="-1"></canvas>
+            <div class="game-loading" id="game-loading">
+                <p>{{ t('game_loading') }}</p>
+                <div class="game-progress"><div id="game-progress-bar"></div></div>
+            </div>
+            <div class="game-rotate-hint">{{ t('game_rotate_hint') }}</div>
+        </div>
+        {% else %}
+        <div class="game-frame">
+            <div class="game-placeholder">
+                <p class="game-placeholder-icon">🛩️</p>
+                <h2>{{ t('game_placeholder_title') }}</h2>
+                <p>{{ t('game_placeholder_text') }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    {% if build %}
+    <script src="{{ build.url }}/{{ build.loader }}"></script>
+    <script>
+    (function () {
+        var canvas = document.getElementById("unity-canvas");
+        var frame = document.getElementById("game-frame");
+        var loading = document.getElementById("game-loading");
+        var bar = document.getElementById("game-progress-bar");
+        var buildUrl = {{ build.url | tojson }};
+        var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        var config = {
+            dataUrl: buildUrl + "/" + {{ build.data | tojson }},
+            frameworkUrl: buildUrl + "/" + {{ build.framework | tojson }},
+            codeUrl: buildUrl + "/" + {{ build.code | tojson }},
+            streamingAssetsUrl: "/games-build/{{ slug }}/StreamingAssets",
+            companyName: "Phumigator",
+            productName: {{ t('game_' ~ slug ~ '_title') | tojson }},
+            productVersion: "1.0",
+            matchWebGLToCanvasSize: true,
+        };
+        // Retina-экраны телефонов: полное разрешение роняет FPS, 2x хватает
+        if (isMobile) {
+            config.devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        }
+
+        createUnityInstance(canvas, config, function (progress) {
+            bar.style.width = Math.round(progress * 100) + "%";
+        }).then(function (instance) {
+            loading.hidden = true;
+            document.getElementById("game-fullscreen").addEventListener("click", function () {
+                if (frame.requestFullscreen) {
+                    frame.requestFullscreen().then(function () {
+                        if (screen.orientation && screen.orientation.lock) {
+                            screen.orientation.lock("landscape").catch(function () {});
+                        }
+                    }).catch(function () { instance.SetFullscreen(1); });
+                } else {
+                    instance.SetFullscreen(1);
+                }
+            });
+        }).catch(function (message) {
+            loading.innerHTML = "<p>" + {{ t('game_load_error') | tojson }} + "</p><p>" + message + "</p>";
+        });
+    })();
+    </script>
+    {% endif %}
+</body>
+</html>
