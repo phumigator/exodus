@@ -823,6 +823,11 @@ body.game-page main.game-main {
     color: var(--pip-green);
 }
 
+/* display:flex выше перебивает атрибут hidden */
+.game-loading[hidden] {
+    display: none;
+}
+
 .game-placeholder-icon {
     font-size: 3rem;
     margin: 0;
