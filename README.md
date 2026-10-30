@@ -79,5 +79,9 @@ exodus/
 особые заголовки в nginx не нужны. Если пересобрать её с Brotli/Gzip без fallback
 (`.br`/`.gz`), Flask сам выставит `Content-Encoding`, а Brotli в браузере работает только по HTTPS.
 
+Общая таблица рекордов игры: `GET/POST /games-api/<slug>/scores` (`web/game_scores.py`).
+Данные лежат в SQLite-файле `web/games_data/scores.sqlite` вне git (путь можно
+переопределить через `EXODUS_GAMES_DB`); у процесса сайта должны быть права на запись в эту папку.
+
 Новая игра: добавить slug в `GAMES` (`web/games.py`) и строки
 `game_<slug>_title` / `game_<slug>_desc` в `web/translations.py`.

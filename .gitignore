@@ -3,3 +3,6 @@ __pycache__/
 .venv/
 .env
 .idea/
+
+# Таблицы рекордов игр (SQLite)
+web/games_data/

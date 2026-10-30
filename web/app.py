@@ -11,6 +11,7 @@ from flask import Flask, abort, g, redirect, render_template, request
 
 from analytics_app import create_analytics_app
 from dash_app import create_dash_app
+from game_scores import handle_scores
 from games import GAMES, find_unity_build, send_build_file
 from translations import DEFAULT_LANG, SUPPORTED_LANGS, TRANSLATIONS, translate
 
@@ -82,6 +83,12 @@ def create_app():
         if slug not in GAMES:
             abort(404)
         return send_build_file(slug, filename)
+
+    @server.route("/games-api/<slug>/scores", methods=["GET", "POST"])
+    def game_scores(slug):
+        if slug not in GAMES:
+            abort(404)
+        return handle_scores(slug)
 
     return server
 
