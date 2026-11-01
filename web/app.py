@@ -84,6 +84,11 @@ def create_app():
             abort(404)
         return send_build_file(slug, filename)
 
+    # Ad networks look for this at the root of the developer site named in the store listing
+    @server.route("/app-ads.txt")
+    def app_ads():
+        return server.send_static_file("app-ads.txt")
+
     @server.route("/games-api/<slug>/scores", methods=["GET", "POST"])
     def game_scores(slug):
         if slug not in GAMES:
