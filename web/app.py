@@ -89,6 +89,10 @@ def create_app():
     def app_ads():
         return server.send_static_file("app-ads.txt")
 
+    @server.route("/flightbounty/privacy")
+    def flightbounty_privacy():
+        return server.send_static_file("flightbounty-privacy.html")
+
     @server.route("/games-api/<slug>/scores", methods=["GET", "POST"])
     def game_scores(slug):
         if slug not in GAMES:
