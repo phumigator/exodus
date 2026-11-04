@@ -128,7 +128,7 @@ uvicorn main:app --port 8000
 
 Обновление: `git pull`, затем при запуске команд от root `chown -R www-data:www-data` на папку проекта и
 перезапуск изменившегося сервиса. Если после обновления игра не загружается, проверьте, что файл
-`web/games_builds/seaplane/Build/Seaplane.data.unityweb` весит десятки мегабайт, а не около 130 байт.
+`web/games_builds/seaplane/Build/FlightBounty.data.unityweb` весит десятки мегабайт, а не около 130 байт.
 
 ## Браузерные игры (Unity WebGL)
 
