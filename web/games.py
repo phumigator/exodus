@@ -20,6 +20,13 @@ GAMES = {
     "seaplane": ("game_seaplane_title", "game_seaplane_desc"),
 }
 
+# Android-версии игр: slug -> имя APK. Сами файлы (100+ МБ) в git не лежат —
+# их кладут на сервер в EXODUS_DOWNLOADS_DIR, а отдаёт nginx под /downloads/.
+DOWNLOADS_DIR = Path(os.environ.get("EXODUS_DOWNLOADS_DIR", "/var/www/downloads"))
+APK_FILES = {
+    "seaplane": "FlightBounty.apk",
+}
+
 # Сжатые файлы Unity: расширение -> Content-Encoding
 _ENCODINGS = {".br": "br", ".gz": "gzip"}
 
@@ -77,3 +84,13 @@ def send_build_file(slug: str, filename: str):
     if encoding:
         response.headers["Content-Encoding"] = encoding
     return response
+
+
+def find_apk(slug: str):
+    """Ссылка и размер APK для страницы игры или None, если APK нет."""
+    name = APK_FILES.get(slug)
+    if not name:
+        return None
+    path = DOWNLOADS_DIR / name
+    size_mb = round(path.stat().st_size / 1024 / 1024) if path.is_file() else None
+    return {"url": f"/downloads/{name}", "name": name, "size_mb": size_mb}

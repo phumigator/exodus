@@ -850,6 +850,43 @@ body.game-page main.game-main {
     display: none;
 }
 
+/* Блок "Скачать APK" под игрой */
+.game-apk {
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--pip-green-dim);
+    background: var(--pip-panel);
+}
+
+.game-apk h2 {
+    margin: 0 0 .5rem;
+    font-size: 1.1rem;
+    color: var(--pip-green);
+    text-shadow: var(--pip-glow);
+}
+
+.game-apk p {
+    margin: 0 0 1rem;
+    color: var(--pip-text);
+}
+
+.game-apk-button {
+    display: inline-block;
+    padding: .6rem 1.2rem;
+    border: 1px solid var(--pip-green);
+    color: var(--pip-green);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    text-shadow: var(--pip-glow);
+}
+
+.game-apk-button:hover {
+    background: var(--pip-green);
+    color: var(--pip-input-bg);
+    text-shadow: none;
+}
+
 /* Телефон в портретной ориентации: игра горизонтальная, растягиваем рамку на экран и просим повернуть */
 @media (max-width: 900px) and (orientation: portrait) {
     .game-frame {

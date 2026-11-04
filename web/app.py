@@ -12,7 +12,7 @@ from flask import Flask, abort, g, redirect, render_template, request
 from analytics_app import create_analytics_app
 from dash_app import create_dash_app
 from game_scores import handle_scores
-from games import GAMES, find_unity_build, send_build_file
+from games import GAMES, find_apk, find_unity_build, send_build_file
 from translations import DEFAULT_LANG, SUPPORTED_LANGS, TRANSLATIONS, translate
 
 # В проде nginx проксирует FastAPI под /api/ (см. nginx/exodus.conf);
@@ -76,7 +76,9 @@ def create_app():
     def game(slug):
         if slug not in GAMES:
             abort(404)
-        return render_template("game.html", slug=slug, build=find_unity_build(slug))
+        return render_template(
+            "game.html", slug=slug, build=find_unity_build(slug), apk=find_apk(slug),
+        )
 
     @server.route("/games-build/<slug>/<path:filename>")
     def game_build_file(slug, filename):

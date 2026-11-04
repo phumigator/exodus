@@ -38,6 +38,16 @@
             </div>
         </div>
         {% endif %}
+
+        {% if apk %}
+        <section class="game-apk">
+            <h2>{{ t('game_apk_title') }}</h2>
+            <p>{{ t('game_apk_text') }}</p>
+            <a class="game-apk-button" href="{{ apk.url }}" download>
+                ⬇ {{ t('game_apk_download') }}{% if apk.size_mb %} ({{ apk.size_mb }} {{ t('game_apk_size') }}){% endif %}
+            </a>
+        </section>
+        {% endif %}
     </main>
 
     {% if build %}

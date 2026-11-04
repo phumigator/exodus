@@ -248,6 +248,10 @@ TRANSLATIONS = {
         "game_placeholder_text": "Браузерная версия появится здесь, как только будет загружена WebGL-сборка.",
         "game_rotate_hint": "Поверните телефон горизонтально",
         "game_load_error": "Не удалось загрузить игру",
+        "game_apk_title": "📱 Версия для Android",
+        "game_apk_text": "Установите FLIGHTBOUNTY на телефон: скачайте APK и откройте его. Android может попросить разрешить установку из этого источника.",
+        "game_apk_download": "Скачать APK",
+        "game_apk_size": "МБ",
     },
     "en": {
         # nav
@@ -454,6 +458,10 @@ TRANSLATIONS = {
         "game_placeholder_text": "The browser version will appear here as soon as the WebGL build is uploaded.",
         "game_rotate_hint": "Rotate your phone to landscape",
         "game_load_error": "Failed to load the game",
+        "game_apk_title": "📱 Android version",
+        "game_apk_text": "Install FLIGHTBOUNTY on your phone: download the APK and open it. Android may ask you to allow installs from this source.",
+        "game_apk_download": "Download APK",
+        "game_apk_size": "MB",
     },
 }
 
